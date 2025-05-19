@@ -1,0 +1,28 @@
+{
+    "en": {
+        "title": "MultiConverter - All-in-One Converter",
+        "choose_action": "Choose Action:",
+        "image_compress": "Image Compression",
+        "image_convert": "Image Format Conversion",
+        "text_convert": "Text Format Conversion",
+        "audio_compress": "Audio Compression",
+        "quality": "Quality (1-100):",
+        "convert_button": "Convert/Compress",
+        "processing": "🚀 Processing... Please wait.",
+        "completed": "✅ Conversion completed!",
+        "download": "Download Converted File"
+    },
+    "zh": {
+        "title": "多功能转换器 - 一体化转换工具",
+        "choose_action": "选择操作：",
+        "image_compress": "图片压缩",
+        "image_convert": "图片格式转换",
+        "text_convert": "文本格式转换",
+        "audio_compress": "音频压缩",
+        "quality": "质量（1-100）：",
+        "convert_button": "转换/压缩",
+        "processing": "🚀 处理中... 请稍候。",
+        "completed": "✅ 转换完成！",
+        "download": "下载转换后的文件"
+    }
+}
