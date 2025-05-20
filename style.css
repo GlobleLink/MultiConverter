@@ -585,3 +585,24 @@ footer {
 .result .download-btn:hover {
   text-decoration: underline;
 }
+/* ---------------- ZIP & Progress ---------------- */
+.progress {
+  text-align: center;
+  color: #58d3f7;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.zip-btn {
+  margin-left: 0.5rem;
+}
+
+/* ---------- 单条下载链接样式 ---------- */
+.result .download-btn {
+  display: inline-block;
+  margin: 0.5rem 0;
+  color: #58d3f7;
+  text-decoration: none;
+}
+.result .download-btn:hover {
+  text-decoration: underline;
+}
