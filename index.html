@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Free online file compression and format conversion tool. Supports images (JPG, PNG, HEIC), videos (MP4, GIF), audio (MP3, WAV), and PDF files.">
+    <meta name="keywords" content="file compression, format conversion, image compression, video compression, audio compression, pdf compression">
+    <title>Online File Compression and Format Conversion Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Online File Compression and Format Conversion</h1>
+        <nav>
+            <a href="#image-compression">Image Compression</a>
+            <a href="#video-compression">Video Compression</a>
+            <a href="#pdf-compression">PDF Compression</a>
+            <a href="#audio-compression">Audio Compression</a>
+        </nav>
+    </header>
+
+    <main>
+        <section id="image-compression">
+            <h2>Image Compression and Conversion</h2>
+            <input type="file" id="imageInput" accept="image/*">
+            <button onclick="compressImage()">Compress Image</button>
+            <button onclick="convertImage()">Convert Image</button>
+            <div id="imagePreview"></div>
+        </section>
+
+        <section id="video-compression">
+            <h2>Video Compression</h2>
+            <input type="file" id="videoInput" accept="video/*">
+            <button onclick="compressVideo()">Compress Video</button>
+        </section>
+
+        <section id="pdf-compression">
+            <h2>PDF Compression</h2>
+            <input type="file" id="pdfInput" accept="application/pdf">
+            <button onclick="compressPDF()">Compress PDF</button>
+        </section>
+
+        <section id="audio-compression">
+            <h2>Audio Compression</h2>
+            <input type="file" id="audioInput" accept="audio/*">
+            <button onclick="compressAudio()">Compress Audio</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>Online File Compression and Format Conversion Tool &copy; 2025</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
