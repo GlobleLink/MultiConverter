@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Image Compression • Smart File Tools</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Sub‐navigation -->
+  <nav class="sub-nav">
+    <a href="index.html">← Back to Home</a>
+    <a href="image-compression.html" class="active">Image Compression</a>
+    <a href="video-compression.html">Video Compression</a>
+    <a href="format-conversion.html">Format Conversion</a>
+    <a href="pdf-compression.html">PDF Compression</a>
+  </nav>
+
+  <header class="sub-header">
+    <h1>Image Compression</h1>
+  </header>
+
+  <main class="subpage">
+    <!-- Drag & Drop Area -->
+    <div class="drop-area" id="dropArea">
+      <div class="icon">
+        <!-- reuse inline SVG or <img src="icons/image.svg"> -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="#58d3f7" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M21 15l-5-5L5 21"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+        </svg>
+      </div>
+      <p>Drag & drop an image here, or click to select</p>
+      <input type="file" id="fileInput" accept="image/*" />
+    </div>
+
+    <!-- Quality Options -->
+    <div class="quality-options">
+      <label><input type="radio" name="quality" value="0.3" /> Low</label>
+      <label><input type="radio" name="quality" value="0.6" checked /> Medium</label>
+      <label><input type="radio" name="quality" value="0.9" /> High</label>
+    </div>
+
+    <!-- Action Button -->
+    <button id="compressBtn" class="action-btn">Compress Image</button>
+
+    <!-- Result Section -->
+    <section class="result">
+      <h2>Result:</h2>
+      <div id="output"></div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="recommendations">
+      <h2>You May Also Need These Tools</h2>
+      <div class="card-grid">
+        <a href="batch-image-compression.html" class="card">
+          <div class="icon">
+            <!-- batch icon SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="#58d3f7" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="4" width="16" height="16" rx="2"/>
+              <path d="M4 8h16"/>
+            </svg>
+          </div>
+          <span>Batch Image Compression</span>
+          <button class="small-btn">Use Now</button>
+        </a>
+        <a href="heic-to-jpg.html" class="card">
+          <div class="icon">
+            <!-- heic->jpg icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="#58d3f7" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 4h18v16H3z"/>
+              <text x="5" y="18" font-size="6">HEIC→JPG</text>
+            </svg>
+          </div>
+          <span>HEIC to JPG</span>
+          <button class="small-btn">Use Now</button>
+        </a>
+        <a href="mp4-to-gif.html" class="card">
+          <div class="icon">
+            <!-- mp4->gif icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="#58d3f7" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <text x="5" y="18" font-size="6">MP4→GIF</text>
+            </svg>
+          </div>
+          <span>MP4 to GIF</span>
+          <button class="small-btn">Use Now</button>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Smart File Tools</p>
+  </footer>
+
+  <script>
+    // 简单的拖拽 & 压缩逻辑示例
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const compressBtn = document.getElementById('compressBtn');
+    const output = document.getElementById('output');
+
+    dropArea.addEventListener('click', () => fileInput.click());
+    dropArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropArea.classList.add('hover');
+    });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault();
+      dropArea.classList.remove('hover');
+      fileInput.files = e.dataTransfer.files;
+    });
+
+    compressBtn.addEventListener('click', () => {
+      const file = fileInput.files[0];
+      if (!file) return alert('Please select an image.');
+      const quality = document.querySelector('input[name="quality"]:checked').value;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(blob => {
+            // 显示结果
+            const url = URL.createObjectURL(blob);
+            output.innerHTML = `<a href="${url}" download="compressed.jpg">Download Compressed Image</a>`;
+          }, 'image/jpeg', parseFloat(quality));
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
