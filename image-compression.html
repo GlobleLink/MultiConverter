@@ -21,13 +21,20 @@
   </header>
 
   <main class="subpage">
+    <!-- Tips: upload limit, supported formats, output format -->
+    <p class="upload-info">
+      You can upload up to <strong>3 images</strong> per batch.<br/>
+      Supported formats: JPG, PNG, GIF, WEBP, BMP.<br/>
+      Compressed files will be downloaded as <strong>JPEG</strong> images.
+    </p>
+
     <!-- Drag & Drop Zone -->
     <div class="drop-area" id="dropArea">
       <div class="icon">
         <img src="icons/image.svg" alt="Image Icon">
       </div>
-      <p>Drag & drop an image here, or click to select</p>
-      <input type="file" id="fileInput" accept="image/*">
+      <p>Drag & drop images here, or click to select</p>
+      <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
     <!-- Uploaded File Info -->
@@ -44,7 +51,7 @@
     </div>
 
     <!-- Compress Button -->
-    <button id="compressBtn" class="action-btn">Compress Image</button>
+    <button id="compressBtn" class="action-btn">Compress Images</button>
 
     <!-- Result Display -->
     <section class="result">
@@ -59,12 +66,13 @@
 
   <script>
     // Elements
-    const dropArea  = document.getElementById('dropArea');
-    const fileInput = document.getElementById('fileInput');
-    const fileInfo  = document.getElementById('fileInfo');
-    const fileName  = document.getElementById('fileName');
+    const dropArea    = document.getElementById('dropArea');
+    const fileInput   = document.getElementById('fileInput');
+    const fileInfo    = document.getElementById('fileInfo');
+    const fileNameEl  = document.getElementById('fileName');
     const compressBtn = document.getElementById('compressBtn');
-    const output    = document.getElementById('output');
+    const output      = document.getElementById('output');
+    const maxFiles    = 3;
 
     // Drag & drop + click upload
     dropArea.addEventListener('click',   () => fileInput.click());
@@ -74,43 +82,61 @@
       e.preventDefault();
       dropArea.classList.remove('hover');
       fileInput.files = e.dataTransfer.files;
-      showFileInfo();
+      handleFiles();
     });
 
-    // Show file info on manual select
-    fileInput.addEventListener('change', showFileInfo);
+    // Handle manual selection
+    fileInput.addEventListener('change', handleFiles);
 
-    function showFileInfo() {
-      const file = fileInput.files[0];
-      if (!file) return;
-      fileName.textContent = file.name;
+    function handleFiles() {
+      const files = Array.from(fileInput.files);
+      if (files.length === 0) {
+        fileInfo.style.display = 'none';
+        return;
+      }
+      if (files.length > maxFiles) {
+        alert(`You can only select up to ${maxFiles} images at once.`);
+        fileInput.value = '';
+        fileInfo.style.display = 'none';
+        return;
+      }
+      // Show file count
+      fileNameEl.textContent = `${files.length} file${files.length > 1 ? 's' : ''} selected`;
       fileInfo.style.display = 'flex';
     }
 
-    // Compression logic
+    // Batch compression logic
     compressBtn.addEventListener('click', () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        return alert('Please select an image.');
-      }
+      const files = Array.from(fileInput.files);
+      if (!files.length) return alert('Please select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width  = img.width;
-          canvas.height = img.height;
-          canvas.getContext('2d').drawImage(img, 0, 0);
-          canvas.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            output.innerHTML =
-              `<a href="${url}" download="compressed.jpg" class="download-btn">Download Compressed Image</a>`;
-          }, 'image/jpeg', quality);
+      output.innerHTML = '';  // clear previous results
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width  = img.width;
+            canvas.height = img.height;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            canvas.toBlob(blob => {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              const name = file.name.replace(/\.[^/.]+$/, '');
+              a.download = name + '-compressed.jpg';
+              a.textContent = 'Download ' + file.name;
+              a.className = 'download-btn';
+              output.appendChild(a);
+              output.appendChild(document.createElement('br'));
+            }, 'image/jpeg', quality);
+          };
         };
-      };
-      reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
+      });
     });
   </script>
 </body>
