@@ -9,7 +9,67 @@ body {
   line-height: 1.5;
 }
 
-/* ========== Sub-navigation ========== */
+/* ========== Homepage Styles ========== */
+.home-header {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.home-header h1 {
+  font-size: 2.5rem;
+  color: #58d3f7;
+  margin-bottom: 0.5rem;
+}
+.home-header p {
+  color: #c9d1d9;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Tool grid */
+.tool-section {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.tool-section h2 {
+  color: #e6f2fb;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+.tool-card {
+  background: #161c2d;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(88, 211, 247, 0.2);
+}
+.tool-card .icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.75rem;
+}
+.tool-card .icon img,
+.tool-card .icon svg {
+  width: 100%;
+  height: 100%;
+}
+.tool-card h3 {
+  color: #e6f2fb;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* ========== Sub-navigation (2nd-level pages) ========== */
 .sub-nav {
   display: flex; gap:1rem;
   padding:1rem 2rem; background:#161c2d;
@@ -22,9 +82,13 @@ body {
 }
 .sub-nav a.back { margin-right:auto; }
 
-/* ========== Header ========== */
-.sub-header { text-align:center; padding:2rem 1rem; }
-.sub-header h1 { font-size:2rem; color:#58d3f7; }
+/* ========== Sub-header (2nd-level) ========== */
+.sub-header {
+  text-align:center; padding:2rem 1rem;
+}
+.sub-header h1 {
+  font-size:2rem; color:#58d3f7;
+}
 
 /* ========== Upload Info ========== */
 .upload-info {
@@ -43,7 +107,9 @@ body {
   margin:1rem auto; max-width:600px;
   transition:background 0.3s;
 }
-.drop-area.hover { background:rgba(88,211,247,0.1); }
+.drop-area.hover {
+  background:rgba(88,211,247,0.1);
+}
 .drop-area .icon img {
   width:48px; height:48px; margin-bottom:1rem;
 }
@@ -63,16 +129,20 @@ body {
 .file-names {
   list-style:none; margin:0; padding:0;
 }
-.file-names li { font-size:0.9rem; color:#c9d1d9; }
+.file-names li {
+  font-size:0.9rem; color:#c9d1d9;
+}
 
-/* ========== Quality ========== */
+/* ========== Quality Options ========== */
 .quality-options {
   text-align:center; margin:1rem 0;
 }
 .quality-options label {
   margin:0 1rem; color:#c9d1d9; font-weight:500;
 }
-.quality-options input { margin-right:0.25rem; }
+.quality-options input {
+  margin-right:0.25rem;
+}
 
 /* ========== Actions ========== */
 .actions {
@@ -84,10 +154,18 @@ body {
   padding:0.75rem 2rem; font-size:1rem;
   cursor:pointer; margin:0 0.5rem;
 }
-.action-btn:hover { background:#7adfff; }
-.reset-btn { background:#ff4c4c !important; color:#fff !important; }
-.reset-btn:hover { background:#ff6b6b !important; }
-.zip-btn { margin-left:0.5rem; }
+.action-btn:hover {
+  background:#7adfff;
+}
+.reset-btn {
+  background:#ff4c4c !important; color:#fff !important;
+}
+.reset-btn:hover {
+  background:#ff6b6b !important;
+}
+.zip-btn {
+  margin-left:0.5rem;
+}
 
 /* ========== Progress ========== */
 .progress {
@@ -95,19 +173,24 @@ body {
   margin:1rem 0; font-size:0.9rem;
 }
 
-/* ========== Result ========== */
+/* ========== Result Links ========== */
 .result {
   max-width:600px; margin:2rem auto; text-align:left;
 }
-.result h2 { color:#c9d1d9; margin-bottom:0.5rem; }
+.result h2 {
+  color:#c9d1d9; margin-bottom:0.5rem;
+}
 .result .download-btn {
   background:none !important; color:#58d3f7 !important;
   text-decoration:underline; display:inline-block;
   margin:0.5rem 0; padding:0;
 }
-.result .download-btn:hover { text-decoration:none; }
+.result .download-btn:hover {
+  text-decoration:none;
+}
 
 /* ========== Footer ========== */
 footer {
-  text-align:center; padding:1rem; color:#6c7685; font-size:0.9rem;
+  text-align:center; padding:1rem;
+  color:#6c7685; font-size:0.9rem;
 }
