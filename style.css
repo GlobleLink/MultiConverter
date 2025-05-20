@@ -1,0 +1,236 @@
+/* style.css for inline SVG version */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background-color: #0b0f18;
+  color: #e6f2fb;
+}
+
+header {
+  text-align: center;
+  padding: 2rem 1rem;
+  background-color: #0b0f18;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  color: #58d3f7;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #a0aabf;
+  font-size: 1rem;
+  margin: 0;
+}
+
+main {
+  max-width: 1000px;
+  margin: auto;
+  padding: 2rem;
+}
+
+.category {
+  margin-bottom: 3rem;
+}
+
+.category h2 {
+  color: #58d3f7;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: #161c2d;
+  border: 1px solid #2b3245;
+  border-radius: 16px;
+  text-align: center;
+  padding: 2rem 1rem;
+  text-decoration: none;
+  color: #e6f2fb;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  background: #1f2a40;
+  box-shadow: 0 0 12px #58d3f7aa;
+  transform: translateY(-4px);
+}
+
+.card .icon svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.75rem;
+}
+
+.card span {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: #0b0f18;
+  color: #6c7685;
+  font-size: 0.9rem;
+}
+/* Subpage Navigation */
+.sub-nav {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: #161c2d;
+}
+.sub-nav a {
+  color: #6c7685;
+  text-decoration: none;
+  font-weight: 500;
+}
+.sub-nav a.active {
+  color: #58d3f7;
+}
+.sub-nav a.back {
+  margin-right: auto;
+}
+
+/* Subpage Header */
+.sub-header {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.sub-header h1 {
+  font-size: 2rem;
+  color: #58d3f7;
+}
+
+/* Drop Area */
+.drop-area {
+  border: 2px dashed #2b3245;
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  color: #6c7685;
+  margin: 1rem auto;
+  max-width: 600px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.drop-area.hover {
+  background: rgba(88, 211, 247, 0.1);
+}
+.drop-area input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top:0; left:0;
+  opacity: 0;
+  cursor: pointer;
+}
+.drop-area .icon img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  filter: none;
+}
+
+/* Quality Options */
+.quality-options {
+  text-align: center;
+  margin: 1rem 0;
+}
+.quality-options label {
+  margin: 0 1rem;
+  color: #c9d1d9;
+  font-weight: 500;
+}
+.quality-options input {
+  margin-right: 0.25rem;
+}
+
+/* Action Button */
+.action-btn {
+  display: block;
+  margin: 1rem auto 2rem;
+  padding: 0.75rem 2rem;
+  background: #58d3f7;
+  color: #0b0f18;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.action-btn:hover {
+  background: #7adfff;
+}
+
+/* Result Section */
+.result {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+.result h2 {
+  color: #c9d1d9;
+  margin-bottom: 0.5rem;
+}
+.download-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #58d3f7;
+  color: #0b0f18;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+/* Recommendations */
+.recommendations {
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 1rem 2rem;
+}
+.recommendations h2 {
+  color: #c9d1d9;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.tool-card {
+  background: #161c2d;
+  border: 1px solid #2b3245;
+  border-radius: 12px;
+  text-align: center;
+  padding: 1.5rem;
+  color: #e6f2fb;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.tool-card:hover {
+  background: #1f2a40;
+  box-shadow: 0 0 12px #58d3f7aa;
+}
+.tool-card .icon img {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 0.5rem;
+}
+.tool-card span {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.small-btn {
+  padding: 0.4rem 1rem;
+  background: #58d3f7;
+  color: #0b0f18;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.small-btn:hover {
+  background: #7adfff;
+}
