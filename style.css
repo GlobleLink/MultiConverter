@@ -543,3 +543,24 @@ footer {
   display: inline-block;
   margin: 0.5rem 0;
 }
+/* ---------- ZIP & Progress Styles ---------- */
+.progress {
+  text-align: center;
+  color: #58d3f7;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+
+.zip-btn {
+  margin-left: 0.5rem;
+}
+
+/* adjustments for individual download links */
+.result .download-btn {
+  font-size: 0.9rem;
+  color: #58d3f7;
+  text-decoration: none;
+}
+.result .download-btn:hover {
+  text-decoration: underline;
+}
