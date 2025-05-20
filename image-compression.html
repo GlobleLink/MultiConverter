@@ -4,14 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Image Compression • Smart File Tools</title>
-  <!-- 引入主体样式表：确保路径指向你项目里的 style.css -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- 引入 JSZip（用于打包 ZIP） -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
 </head>
 <body>
-  <!-- 顶部导航（同主页样式） -->
   <nav class="sub-nav">
     <a href="index.html" class="back">← Back to Home</a>
     <a href="image-compression.html" class="active">Image Compression</a>
@@ -25,7 +21,6 @@
   </header>
 
   <main class="subpage">
-    <!-- 上传提示 -->
     <p class="upload-info">
       You can upload up to <strong>3 images</strong> per batch.<br/>
       <span class="highlight">Supported formats:</span> JPG, PNG, GIF, WEBP, BMP.<br/>
@@ -33,37 +28,31 @@
       *Click “Select Files” multiple times to add more.
     </p>
 
-    <!-- 拖拽 & 选择区 -->
     <div class="drop-area" id="dropArea">
       <div class="icon"><img src="icons/image.svg" alt=""></div>
       <p>Drag & drop images here, or click to select</p>
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
-    <!-- 选中文件列表 -->
     <div class="file-info" id="fileInfo" style="display:none;">
       <img src="icons/image.svg" class="file-icon" alt="">
       <ul id="fileNames" class="file-names"></ul>
     </div>
 
-    <!-- 质量选项 -->
     <div class="quality-options">
       <label><input type="radio" name="quality" value="0.3"> Low</label>
       <label><input type="radio" name="quality" value="0.6" checked> Medium</label>
       <label><input type="radio" name="quality" value="0.9"> High</label>
     </div>
 
-    <!-- 操作按钮：压缩 / ZIP 下载 / 重置 -->
     <div class="actions">
       <button id="compressBtn" class="action-btn">Compress Images</button>
       <button id="downloadZipBtn" class="action-btn zip-btn" style="display:none;">Download ZIP</button>
       <button id="resetBtn" class="action-btn reset-btn">Reset</button>
     </div>
 
-    <!-- 进度提示 -->
     <div id="progress" class="progress"></div>
 
-    <!-- 结果 -->
     <section class="result">
       <h2>Result</h2>
       <div id="output"></div>
@@ -75,7 +64,6 @@
   </footer>
 
   <script>
-    // 元素引用
     const dropArea       = document.getElementById('dropArea');
     const fileInput      = document.getElementById('fileInput');
     const fileInfo       = document.getElementById('fileInfo');
@@ -89,10 +77,10 @@
     let selectedFiles    = [];
     let compressedFiles  = [];
 
-    // 确保每次打开文件对话框都能触发 change
-    fileInput.addEventListener('click', () => fileInput.value = '');
+    // 确保每次打开对话框都能触发 change
+    fileInput.addEventListener('mousedown', () => fileInput.value = '');
 
-    // 点击与拖拽行为
+    // 点击与拖拽上传
     dropArea.addEventListener('click', () => fileInput.click());
     dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
     dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
@@ -103,7 +91,6 @@
     });
     fileInput.addEventListener('change', () => processFiles(fileInput.files));
 
-    // 处理新选中文件
     function processFiles(fileList) {
       const allowedExt = /\.(jpe?g|png|gif|webp|bmp)$/i;
       const newFiles   = Array.from(fileList);
@@ -112,10 +99,9 @@
       if (invalid.length) {
         alert(`Unsupported: ${invalid.map(f => f.name).join(', ')}.\nPlease use JPG/PNG/GIF/WEBP/BMP.`);
       }
-      // 合并 + 去重
+      // 合并去重
       selectedFiles = [...selectedFiles, ...valid]
         .filter((v,i,a) => a.findIndex(t=>t.name===v.name&&t.size===v.size)===i);
-      // 限制数量
       if (selectedFiles.length > maxFiles) {
         alert(`Up to ${maxFiles} images only.`);
         selectedFiles = selectedFiles.slice(0, maxFiles);
@@ -128,16 +114,14 @@
       if (!selectedFiles.length) {
         fileInfo.style.display = 'none';
       } else {
-        fileNamesEl.innerHTML = selectedFiles.map(f=>`<li>${f.name}</li>`).join('');
+        fileNamesEl.innerHTML = selectedFiles.map(f => `<li>${f.name}</li>`).join('');
         fileInfo.style.display = 'flex';
       }
     }
 
-    // 批量压缩循环
+    // 批量压缩
     compressBtn.addEventListener('click', async () => {
-      if (!selectedFiles.length) {
-        return alert('Please select at least one image.');
-      }
+      if (!selectedFiles.length) return alert('Please select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
       output.innerHTML = '';
       progressEl.textContent = '';
@@ -147,8 +131,7 @@
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
         progressEl.textContent = `Compressing ${i+1}/${selectedFiles.length}: ${file.name}`;
-
-        // 读取文件
+        // 读取
         const dataURL = await new Promise(res => {
           const r = new FileReader();
           r.onload = e => res(e.target.result);
@@ -156,21 +139,16 @@
         });
         const img = new Image();
         await new Promise(r => { img.onload = r; img.src = dataURL; });
-
-        // Canvas 压缩
+        // Canvas
         const canvas = document.createElement('canvas');
         canvas.width  = img.width;
         canvas.height = img.height;
         canvas.getContext('2d').drawImage(img, 0, 0);
-
-        // 输出同格式或降级 JPEG
+        // 输出格式同原或降级
         let mime = file.type;
-        if (!['image/png','image/jpeg','image/webp'].includes(mime)) {
-          mime = 'image/jpeg';
-        }
+        if (!['image/png','image/jpeg','image/webp'].includes(mime)) mime = 'image/jpeg';
         const blob = await new Promise(res => canvas.toBlob(res, mime, quality));
-
-        // 大小对比 & 生成链接
+        // 大小对比 & 链接
         const origKB = (file.size/1024).toFixed(1);
         const compKB = (blob.size/1024).toFixed(1);
         const url    = URL.createObjectURL(blob);
@@ -183,7 +161,6 @@
         a.className  = 'download-btn';
         output.appendChild(a);
         output.appendChild(document.createElement('br'));
-
         compressedFiles.push({ name:`${base}-compressed.${ext}`, blob });
       }
 
@@ -191,13 +168,13 @@
       downloadZipBtn.style.display = 'inline-block';
     });
 
-    // 打包 ZIP 并下载
+    // 下载 ZIP
     downloadZipBtn.addEventListener('click', async () => {
       if (!compressedFiles.length) return;
       progressEl.textContent = 'Generating ZIP…';
       const zip = new JSZip();
       compressedFiles.forEach(f => zip.file(f.name, f.blob));
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipBlob = await zip.generateAsync({ type:'blob' });
       const url     = URL.createObjectURL(zipBlob);
       const link    = document.createElement('a');
       link.href     = url;
@@ -210,7 +187,7 @@
       progressEl.textContent = '';
     });
 
-    // 重置
+    // Reset
     resetBtn.addEventListener('click', () => {
       selectedFiles = [];
       compressedFiles = [];
