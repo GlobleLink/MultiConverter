@@ -3,29 +3,29 @@
   margin: 0; padding: 0; box-sizing: border-box;
 }
 body {
-  background: #0b0f18;
+  /* 科技感渐变背景 */
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
   color: #e6f2fb;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
 }
 
-/* ========== Homepage Styles ========== */
+/* ========== Homepage Header ========== */
 .home-header {
   text-align: center;
   padding: 2rem 1rem;
 }
 .home-header h1 {
   font-size: 2.5rem;
-  color: #58d3f7;
+  color: #00d1ff;
   margin-bottom: 0.5rem;
 }
 .home-header p {
   color: #c9d1d9;
   font-size: 1rem;
-  margin-bottom: 2rem;
 }
 
-/* Tool grid */
+/* ========== Tool Sections ========== */
 .tool-section {
   max-width: 900px;
   margin: 2rem auto;
@@ -36,22 +36,30 @@ body {
   font-size: 1.5rem;
   margin-bottom: 1rem;
 }
+
+/* ========== Tool Grid & Cards ========== */
 .tool-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1.5rem;
 }
 .tool-card {
-  background: #161c2d;
+  background: #0e1b44; /* 卡片更亮一点 */
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
   text-decoration: none;
   transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 .tool-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(88, 211, 247, 0.2);
+  box-shadow: 0 0 12px rgba(0,209,255,0.6), 0 8px 20px rgba(0,209,255,0.2);
+}
+.tool-card:focus {
+  outline: none;
+  box-shadow: 0 0 16px rgba(0,209,255,0.8), inset 0 0 8px rgba(0,209,255,0.4);
 }
 .tool-card .icon {
   width: 48px;
@@ -69,128 +77,10 @@ body {
   margin-top: 0.5rem;
 }
 
-/* ========== Sub-navigation (2nd-level pages) ========== */
-.sub-nav {
-  display: flex; gap:1rem;
-  padding:1rem 2rem; background:#161c2d;
-}
-.sub-nav a {
-  color:#6c7685; text-decoration:none; font-weight:500;
-}
-.sub-nav a.active, .sub-nav a:hover {
-  color:#58d3f7;
-}
-.sub-nav a.back { margin-right:auto; }
-
-/* ========== Sub-header (2nd-level) ========== */
-.sub-header {
-  text-align:center; padding:2rem 1rem;
-}
-.sub-header h1 {
-  font-size:2rem; color:#58d3f7;
-}
-
-/* ========== Upload Info ========== */
-.upload-info {
-  text-align:center; color:#6c7685;
-  font-size:0.9rem; margin:1rem auto; max-width:600px; line-height:1.4;
-}
-.upload-info .highlight {
-  color:#58d3f7; text-shadow:0 0 6px rgba(88,211,247,0.6);
-}
-
-/* ========== Drop Area ========== */
-.drop-area {
-  position:relative; border:2px dashed #2b3245;
-  border-radius:12px; padding:3rem;
-  text-align:center; color:#6c7685;
-  margin:1rem auto; max-width:600px;
-  transition:background 0.3s;
-}
-.drop-area.hover {
-  background:rgba(88,211,247,0.1);
-}
-.drop-area .icon img {
-  width:48px; height:48px; margin-bottom:1rem;
-}
-.drop-area input[type="file"] {
-  position:absolute; top:0; left:0; width:100%; height:100%;
-  opacity:0; cursor:pointer; z-index:10;
-}
-
-/* ========== File Info ========== */
-.file-info {
-  display:flex; align-items:flex-start;
-  gap:0.5rem; max-width:600px; margin:1rem auto;
-}
-.file-info .file-icon {
-  width:24px; height:24px;
-}
-.file-names {
-  list-style:none; margin:0; padding:0;
-}
-.file-names li {
-  font-size:0.9rem; color:#c9d1d9;
-}
-
-/* ========== Quality Options ========== */
-.quality-options {
-  text-align:center; margin:1rem 0;
-}
-.quality-options label {
-  margin:0 1rem; color:#c9d1d9; font-weight:500;
-}
-.quality-options input {
-  margin-right:0.25rem;
-}
-
-/* ========== Actions ========== */
-.actions {
-  text-align:center; margin:1rem 0 2rem;
-}
-.action-btn {
-  background:#58d3f7; color:#0b0f18;
-  border:none; border-radius:6px;
-  padding:0.75rem 2rem; font-size:1rem;
-  cursor:pointer; margin:0 0.5rem;
-}
-.action-btn:hover {
-  background:#7adfff;
-}
-.reset-btn {
-  background:#ff4c4c !important; color:#fff !important;
-}
-.reset-btn:hover {
-  background:#ff6b6b !important;
-}
-.zip-btn {
-  margin-left:0.5rem;
-}
-
-/* ========== Progress ========== */
-.progress {
-  text-align:center; color:#58d3f7;
-  margin:1rem 0; font-size:0.9rem;
-}
-
-/* ========== Result Links ========== */
-.result {
-  max-width:600px; margin:2rem auto; text-align:left;
-}
-.result h2 {
-  color:#c9d1d9; margin-bottom:0.5rem;
-}
-.result .download-btn {
-  background:none !important; color:#58d3f7 !important;
-  text-decoration:underline; display:inline-block;
-  margin:0.5rem 0; padding:0;
-}
-.result .download-btn:hover {
-  text-decoration:none;
-}
-
 /* ========== Footer ========== */
 footer {
-  text-align:center; padding:1rem;
-  color:#6c7685; font-size:0.9rem;
+  text-align: center;
+  padding: 1rem;
+  color: #6c7685;
+  font-size: 0.9rem;
 }
