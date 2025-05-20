@@ -3,11 +3,9 @@
   margin: 0; padding: 0; box-sizing: border-box;
 }
 body {
-  /* 科技感渐变背景 */
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background: #0a192f; /* 深蓝科技感 */
   color: #e6f2fb;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  /* … */
 }
 
 /* ========== Homepage Header ========== */
