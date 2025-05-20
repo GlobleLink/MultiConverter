@@ -31,6 +31,7 @@
     <div class="drop-area" id="dropArea">
       <div class="icon"><img src="icons/image.svg" alt=""></div>
       <p>Drag & drop images here, or click to select</p>
+      <!-- 覆盖全区的 input，点击本身弹一次对话框 -->
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
@@ -64,8 +65,8 @@
   </footer>
 
   <script>
-    const dropArea       = document.getElementById('dropArea');
     const fileInput      = document.getElementById('fileInput');
+    const dropArea       = document.getElementById('dropArea');
     const fileInfo       = document.getElementById('fileInfo');
     const fileNamesEl    = document.getElementById('fileNames');
     const compressBtn    = document.getElementById('compressBtn');
@@ -77,88 +78,93 @@
     let selectedFiles    = [];
     let compressedFiles  = [];
 
-    // 确保每次打开对话框都能触发 change
+    // 重置 value，保证每次 change 都触发
     fileInput.addEventListener('mousedown', () => fileInput.value = '');
 
-    // 点击与拖拽上传
-    dropArea.addEventListener('click', () => fileInput.click());
-    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
-    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
+    // 拖拽样式
+    dropArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropArea.classList.add('hover');
+    });
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('hover');
+    });
     dropArea.addEventListener('drop', e => {
       e.preventDefault();
       dropArea.classList.remove('hover');
       processFiles(e.dataTransfer.files);
     });
+
+    // 手动选择
     fileInput.addEventListener('change', () => processFiles(fileInput.files));
 
-    function processFiles(fileList) {
-      const allowedExt = /\.(jpe?g|png|gif|webp|bmp)$/i;
-      const newFiles   = Array.from(fileList);
-      const valid      = newFiles.filter(f => allowedExt.test(f.name));
-      const invalid    = newFiles.filter(f => !allowedExt.test(f.name));
-      if (invalid.length) {
-        alert(`Unsupported: ${invalid.map(f => f.name).join(', ')}.\nPlease use JPG/PNG/GIF/WEBP/BMP.`);
+    function processFiles(list) {
+      const allowed = /\.(jpe?g|png|gif|webp|bmp)$/i;
+      const incoming = [...list];
+      const good = incoming.filter(f => allowed.test(f.name));
+      const bad  = incoming.filter(f => !allowed.test(f.name));
+      if (bad.length) {
+        alert(`Unsupported files:\n${bad.map(f=>f.name).join('\n')}`);
       }
       // 合并去重
-      selectedFiles = [...selectedFiles, ...valid]
+      selectedFiles = [...selectedFiles, ...good]
         .filter((v,i,a) => a.findIndex(t=>t.name===v.name&&t.size===v.size)===i);
       if (selectedFiles.length > maxFiles) {
         alert(`Up to ${maxFiles} images only.`);
         selectedFiles = selectedFiles.slice(0, maxFiles);
       }
-      // 同步回 input.files
+      // 反写 input.files
       const dt = new DataTransfer();
       selectedFiles.forEach(f => dt.items.add(f));
       fileInput.files = dt.files;
-      // 显示文件列表
+      // 显示列表
       if (!selectedFiles.length) {
         fileInfo.style.display = 'none';
       } else {
-        fileNamesEl.innerHTML = selectedFiles.map(f => `<li>${f.name}</li>`).join('');
+        fileNamesEl.innerHTML = selectedFiles.map(f=>`<li>${f.name}</li>`).join('');
         fileInfo.style.display = 'flex';
       }
     }
 
     // 批量压缩
     compressBtn.addEventListener('click', async () => {
-      if (!selectedFiles.length) return alert('Please select at least one image.');
+      if (!selectedFiles.length) return alert('Select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
       output.innerHTML = '';
       progressEl.textContent = '';
       downloadZipBtn.style.display = 'none';
       compressedFiles = [];
 
-      for (let i = 0; i < selectedFiles.length; i++) {
+      for (let i=0; i<selectedFiles.length; i++) {
         const file = selectedFiles[i];
         progressEl.textContent = `Compressing ${i+1}/${selectedFiles.length}: ${file.name}`;
         // 读取
         const dataURL = await new Promise(res => {
-          const r = new FileReader();
-          r.onload = e => res(e.target.result);
-          r.readAsDataURL(file);
+          const reader = new FileReader();
+          reader.onload = e => res(e.target.result);
+          reader.readAsDataURL(file);
         });
         const img = new Image();
-        await new Promise(r => { img.onload = r; img.src = dataURL; });
-        // Canvas
+        await new Promise(res => { img.onload = res; img.src = dataURL; });
+        // Canvas 绘制
         const canvas = document.createElement('canvas');
-        canvas.width  = img.width;
-        canvas.height = img.height;
-        canvas.getContext('2d').drawImage(img, 0, 0);
-        // 输出格式同原或降级
+        canvas.width = img.width; canvas.height = img.height;
+        canvas.getContext('2d').drawImage(img,0,0);
+        // 同格式输出或降级
         let mime = file.type;
         if (!['image/png','image/jpeg','image/webp'].includes(mime)) mime = 'image/jpeg';
         const blob = await new Promise(res => canvas.toBlob(res, mime, quality));
         // 大小对比 & 链接
-        const origKB = (file.size/1024).toFixed(1);
-        const compKB = (blob.size/1024).toFixed(1);
-        const url    = URL.createObjectURL(blob);
-        const a      = document.createElement('a');
-        const base   = file.name.replace(/\.[^/.]+$/, '');
-        const ext    = mime.split('/')[1];
-        a.download   = `${base}-compressed.${ext}`;
-        a.href       = url;
-        a.textContent= `${file.name} (${origKB}KB → ${compKB}KB)`;
-        a.className  = 'download-btn';
+        const origKB = (file.size/1024).toFixed(1),
+              compKB = (blob.size/1024).toFixed(1),
+              url    = URL.createObjectURL(blob),
+              a      = document.createElement('a'),
+              base   = file.name.replace(/\.[^/.]+$/,''),
+              ext    = mime.split('/')[1];
+        a.download    = `${base}-compressed.${ext}`;
+        a.href        = url;
+        a.textContent = `${file.name} (${origKB}KB → ${compKB}KB)`;
+        a.className   = 'download-btn';
         output.appendChild(a);
         output.appendChild(document.createElement('br'));
         compressedFiles.push({ name:`${base}-compressed.${ext}`, blob });
@@ -168,18 +174,17 @@
       downloadZipBtn.style.display = 'inline-block';
     });
 
-    // 下载 ZIP
+    // ZIP 打包
     downloadZipBtn.addEventListener('click', async () => {
       if (!compressedFiles.length) return;
       progressEl.textContent = 'Generating ZIP…';
       const zip = new JSZip();
       compressedFiles.forEach(f => zip.file(f.name, f.blob));
-      const zipBlob = await zip.generateAsync({ type:'blob' });
-      const url     = URL.createObjectURL(zipBlob);
-      const link    = document.createElement('a');
-      link.href     = url;
-      link.download = 'compressed_images.zip';
-      link.style.display = 'none';
+      const blob = await zip.generateAsync({ type:'blob' });
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href        = url;
+      link.download    = 'compressed_images.zip';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -187,7 +192,7 @@
       progressEl.textContent = '';
     });
 
-    // Reset
+    // 重置
     resetBtn.addEventListener('click', () => {
       selectedFiles = [];
       compressedFiles = [];
