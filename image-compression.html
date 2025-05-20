@@ -1,72 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Image Compression • Smart File Tools</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
 </head>
 <body>
   <nav class="sub-nav">
     <a href="index.html" class="back">← Back to Home</a>
     <a href="image-compression.html" class="active">Image Compression</a>
-    <a href="video-compression.html">Video Compression</a>
-    <a href="image-conversion.html">Image Conversion</a>
-    <a href="pdf-compression.html">PDF Compression</a>
   </nav>
-
-  <header class="sub-header">
-    <h1>Image Compression</h1>
-  </header>
-
+  <header class="sub-header"><h1>Image Compression</h1></header>
   <main class="subpage">
     <p class="upload-info">
       You can upload up to <strong>3 images</strong> per batch.<br/>
-      <span class="highlight">Supported formats:</span> JPG, PNG, GIF, WEBP, BMP.<br/>
-      Compressed files remain in the <strong>same format</strong>.<br/>
-      *Click “Select Files” multiple times to add more.
+      <span class="highlight">Supported formats:</span> JPG, PNG, GIF, WEBP, BMP.
     </p>
-
     <div class="drop-area" id="dropArea">
-      <div class="icon"><img src="icons/image.svg" alt=""></div>
+      <div class="icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke="#58d3f7" stroke-width="2"/>
+          <circle cx="8" cy="8" r="1.5" fill="#58d3f7"/>
+          <path d="M3 21L8.5 13L13.5 17.5L21 9V21H3Z" fill="#58d3f7"/>
+        </svg>
+      </div>
       <p>Drag & drop images here, or click to select</p>
-      <!-- 覆盖全区的 input，点击本身弹一次对话框 -->
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
-
     <div class="file-info" id="fileInfo" style="display:none;">
-      <img src="icons/image.svg" class="file-icon" alt="">
+      <svg class="file-icon" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#58d3f7" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8" cy="8" r="1.5"/>
+        <path d="M3 21L8.5 13L13.5 17.5L21 9V21H3Z"/>
+      </svg>
       <ul id="fileNames" class="file-names"></ul>
     </div>
-
     <div class="quality-options">
       <label><input type="radio" name="quality" value="0.3"> Low</label>
       <label><input type="radio" name="quality" value="0.6" checked> Medium</label>
       <label><input type="radio" name="quality" value="0.9"> High</label>
     </div>
-
     <div class="actions">
       <button id="compressBtn" class="action-btn">Compress Images</button>
       <button id="downloadZipBtn" class="action-btn zip-btn" style="display:none;">Download ZIP</button>
       <button id="resetBtn" class="action-btn reset-btn">Reset</button>
     </div>
-
     <div id="progress" class="progress"></div>
-
     <section class="result">
-      <h2>Result</h2>
-      <div id="output"></div>
+      <h2>Result</h2><div id="output"></div>
     </section>
   </main>
-
-  <footer>
-    <p>&copy; 2025 Smart File Tools</p>
-  </footer>
-
+  <footer><p>&copy; 2025 Smart File Tools</p></footer>
   <script>
-    const fileInput      = document.getElementById('fileInput');
     const dropArea       = document.getElementById('dropArea');
+    const fileInput      = document.getElementById('fileInput');
     const fileInfo       = document.getElementById('fileInfo');
     const fileNamesEl    = document.getElementById('fileNames');
     const compressBtn    = document.getElementById('compressBtn');
@@ -78,130 +66,57 @@
     let selectedFiles    = [];
     let compressedFiles  = [];
 
-    // 重置 value，保证每次 change 都触发
-    fileInput.addEventListener('mousedown', () => fileInput.value = '');
+    fileInput.addEventListener('mousedown', ()=>fileInput.value='');
+    dropArea.addEventListener('dragover',e=>{e.preventDefault();dropArea.classList.add('hover');});
+    dropArea.addEventListener('dragleave',()=>dropArea.classList.remove('hover'));
+    dropArea.addEventListener('drop',e=>{e.preventDefault();dropArea.classList.remove('hover');processFiles(e.dataTransfer.files);});
+    fileInput.addEventListener('change',()=>processFiles(fileInput.files));
 
-    // 拖拽样式
-    dropArea.addEventListener('dragover', e => {
-      e.preventDefault();
-      dropArea.classList.add('hover');
-    });
-    dropArea.addEventListener('dragleave', () => {
-      dropArea.classList.remove('hover');
-    });
-    dropArea.addEventListener('drop', e => {
-      e.preventDefault();
-      dropArea.classList.remove('hover');
-      processFiles(e.dataTransfer.files);
-    });
-
-    // 手动选择
-    fileInput.addEventListener('change', () => processFiles(fileInput.files));
-
-    function processFiles(list) {
-      const allowed = /\.(jpe?g|png|gif|webp|bmp)$/i;
-      const incoming = [...list];
-      const good = incoming.filter(f => allowed.test(f.name));
-      const bad  = incoming.filter(f => !allowed.test(f.name));
-      if (bad.length) {
-        alert(`Unsupported files:\n${bad.map(f=>f.name).join('\n')}`);
-      }
-      // 合并去重
-      selectedFiles = [...selectedFiles, ...good]
-        .filter((v,i,a) => a.findIndex(t=>t.name===v.name&&t.size===v.size)===i);
-      if (selectedFiles.length > maxFiles) {
-        alert(`Up to ${maxFiles} images only.`);
-        selectedFiles = selectedFiles.slice(0, maxFiles);
-      }
-      // 反写 input.files
-      const dt = new DataTransfer();
-      selectedFiles.forEach(f => dt.items.add(f));
-      fileInput.files = dt.files;
-      // 显示列表
-      if (!selectedFiles.length) {
-        fileInfo.style.display = 'none';
-      } else {
-        fileNamesEl.innerHTML = selectedFiles.map(f=>`<li>${f.name}</li>`).join('');
-        fileInfo.style.display = 'flex';
-      }
+    function processFiles(list){
+      const ok=/\.(jpe?g|png|gif|webp|bmp)$/i;
+      const arr=[...list],valid=arr.filter(f=>ok.test(f.name)),bad=arr.filter(f=>!ok.test(f.name));
+      if(bad.length)alert(`Unsupported:\n${bad.map(f=>f.name).join('\n')}`);
+      selectedFiles=[...selectedFiles,...valid].filter((v,i,a)=>a.findIndex(t=>t.name===v.name&&t.size===v.size)===i);
+      if(selectedFiles.length>maxFiles){alert(`Up to ${maxFiles} images only.`);selectedFiles=selectedFiles.slice(0,maxFiles);}
+      const dt=new DataTransfer();selectedFiles.forEach(f=>dt.items.add(f));fileInput.files=dt.files;
+      if(!selectedFiles.length)fileInfo.style.display='none';else{fileNamesEl.innerHTML=selectedFiles.map(f=>`<li>${f.name}</li>`).join('');fileInfo.style.display='flex';}
     }
 
-    // 批量压缩
-    compressBtn.addEventListener('click', async () => {
-      if (!selectedFiles.length) return alert('Select at least one image.');
-      const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
-      output.innerHTML = '';
-      progressEl.textContent = '';
-      downloadZipBtn.style.display = 'none';
-      compressedFiles = [];
-
-      for (let i=0; i<selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-        progressEl.textContent = `Compressing ${i+1}/${selectedFiles.length}: ${file.name}`;
-        // 读取
-        const dataURL = await new Promise(res => {
-          const reader = new FileReader();
-          reader.onload = e => res(e.target.result);
-          reader.readAsDataURL(file);
-        });
-        const img = new Image();
-        await new Promise(res => { img.onload = res; img.src = dataURL; });
-        // Canvas 绘制
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width; canvas.height = img.height;
-        canvas.getContext('2d').drawImage(img,0,0);
-        // 同格式输出或降级
-        let mime = file.type;
-        if (!['image/png','image/jpeg','image/webp'].includes(mime)) mime = 'image/jpeg';
-        const blob = await new Promise(res => canvas.toBlob(res, mime, quality));
-        // 大小对比 & 链接
-        const origKB = (file.size/1024).toFixed(1),
-              compKB = (blob.size/1024).toFixed(1),
-              url    = URL.createObjectURL(blob),
-              a      = document.createElement('a'),
-              base   = file.name.replace(/\.[^/.]+$/,''),
-              ext    = mime.split('/')[1];
-        a.download    = `${base}-compressed.${ext}`;
-        a.href        = url;
-        a.textContent = `${file.name} (${origKB}KB → ${compKB}KB)`;
-        a.className   = 'download-btn';
-        output.appendChild(a);
-        output.appendChild(document.createElement('br'));
-        compressedFiles.push({ name:`${base}-compressed.${ext}`, blob });
+    compressBtn.addEventListener('click',async()=>{
+      if(!selectedFiles.length)return alert('Select at least one image.');
+      const quality=parseFloat(document.querySelector('input[name="quality"]:checked').value);
+      output.innerHTML='';progressEl.textContent='';downloadZipBtn.style.display='none';compressedFiles=[];
+      for(let i=0;i<selectedFiles.length;i++){
+        const f=selectedFiles[i];
+        progressEl.textContent=`Compressing ${i+1}/${selectedFiles.length}: ${f.name}`;
+        const dataURL=await new Promise(r=>{const R=new FileReader();R.onload=e=>r(e.target.result);R.readAsDataURL(f);});
+        const img=new Image();await new Promise(r=>{img.onload=r;img.src=dataURL;});
+        const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);
+        let mime=f.type; if(!['image/png','image/jpeg','image/webp'].includes(mime))mime='image/jpeg';
+        const blob=await new Promise(r=>c.toBlob(r,mime,quality));
+        const origKB=(f.size/1024).toFixed(1),compKB=(blob.size/1024).toFixed(1),url=URL.createObjectURL(blob);
+        const a=document.createElement('a'),base=f.name.replace(/\.[^/.]+$/,''),ext=mime.split('/')[1];
+        a.download=`${base}-compressed.${ext}`;a.href=url;a.textContent=`${f.name} (${origKB}KB → ${compKB}KB)`;a.className='download-btn';
+        output.appendChild(a);output.appendChild(document.createElement('br'));
+        compressedFiles.push({name:`${base}-compressed.${ext}`,blob});
       }
-
-      progressEl.textContent = 'Compression complete.';
-      downloadZipBtn.style.display = 'inline-block';
+      progressEl.textContent='Compression complete.';downloadZipBtn.style.display='inline-block';
     });
 
-    // ZIP 打包
-    downloadZipBtn.addEventListener('click', async () => {
-      if (!compressedFiles.length) return;
-      progressEl.textContent = 'Generating ZIP…';
-      const zip = new JSZip();
-      compressedFiles.forEach(f => zip.file(f.name, f.blob));
-      const blob = await zip.generateAsync({ type:'blob' });
-      const url  = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href        = url;
-      link.download    = 'compressed_images.zip';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      progressEl.textContent = '';
+    downloadZipBtn.addEventListener('click',async()=>{
+      if(!compressedFiles.length)return;
+      progressEl.textContent='Generating ZIP…';
+      const zip=new JSZip();compressedFiles.forEach(f=>zip.file(f.name,f.blob));
+      const zblob=await zip.generateAsync({type:'blob'}),url=URL.createObjectURL(zblob);
+      const link=document.createElement('a');link.href=url;link.download='compressed_images.zip';
+      document.body.appendChild(link);link.click();document.body.removeChild(link);URL.revokeObjectURL(url);
+      progressEl.textContent='';
     });
 
-    // 重置
-    resetBtn.addEventListener('click', () => {
-      selectedFiles = [];
-      compressedFiles = [];
-      fileInput.value = '';
-      fileInfo.style.display = 'none';
-      output.innerHTML = '';
-      progressEl.textContent = '';
-      downloadZipBtn.style.display = 'none';
-      document.querySelector('input[name="quality"][value="0.6"]').checked = true;
+    resetBtn.addEventListener('click',()=>{
+      selectedFiles=[];compressedFiles=[];fileInput.value='';fileInfo.style.display='none';
+      output.innerHTML='';progressEl.textContent='';downloadZipBtn.style.display='none';
+      document.querySelector('input[name="quality"][value="0.6"]').checked=true;
     });
   </script>
 </body>
