@@ -1,6 +1,11 @@
-<!DO:contentReference[oaicite:3]{index=3}="UTF-8" />
-  <meta name=":contentReference[oaicite:4]{index=4}-width, initial-scale=1.0"/>:contentReference[oaicite:5]{index=5}ion • Smart File :contentReference[oaicite:6]{index=6}nk rel="styleshee:contentReference[oaicite:7]{index=7}p for ZIP packag:contentReference[oaicite:8]{index=8}/cdnjs.cloudflar:contentReference[oaicite:9]{index=9}1/jszip.min.js"><:contentReference[oaicite:10]{index=10} <nav:contentReference[oaicite:11]{index=11}class="back">← Back to Home<:contentReference[oaicite:12]{index=12}tive">Image Compressio:contentReference[oaicite:13]{index=13}o-compression.ht:contentReference[oaicite:14]{index=14}ression</a>
-    <:contentReference[oaicite:15]{index=15}-conv:contentReference[oaicite:16]{index=16}    <a href="pdf-co:contentReference[oaicite:17]{index=17}</:contentReference[oaicite:18]{index=18}he:contentReference[oaicite:19]{index=19} <main class="subpage">
+<!DOCTYPE html:contentReference[oaicite:5]{index=5}>
+  <meta charset:contentReference[oaicite:6]{index=6} name="viewport" :contentReference[oaicite:7]{index=7}ial-scale=1.0"/>:contentReference[oaicite:8]{index=8}Smart File Tools:contentReference[oaicite:9]{index=9}esheet" href="sty:contentReference[oaicite:10]{index=10}https:contentReference[oaicite:11]{index=11}.1/jszip.min.js"></script>
+<:contentReference[oaicite:12]{index=12}"index.html" class="ba:contentReference[oaicite:13]{index=13}    <a href="ima:contentReference[oaicite:14]{index=14}.html" class="act:contentReference[oaicite:15]{index=15}mpres:contentReference[oaicite:16]{index=16}ssion.html">Video C:contentReference[oaicite:17]{index=17}ge:contentReference[oaicite:18]{index=18}</:contentReference[oaicite:19]{index=19}n</a>
+  </nav>
+
+  <header class="sub-header"><h1>Image Compression</h1></header>
+
+  <main class="subpage">
     <p class="upload-info">
       You can upload up to <strong>3 images</strong> per batch.<br/>
       <span class="highlight">Supported formats:</span> JPG, PNG, GIF, WEBP, BMP.<br/>
@@ -9,7 +14,7 @@
     </p>
 
     <div class="drop-area" id="dropArea">
-      <div class="icon"><img src="icons/image.svg" alt="Image Icon"></div>
+      <div class="icon"><img src="icons/image.svg" alt=""></div>
       <p>Drag & drop images here, or click to select</p>
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
@@ -39,30 +44,29 @@
     </section>
   </main>
 
-  <footer>
-    <p>&copy; 2025 Smart File Tools</p>
-  </footer>
+  <footer><p>&copy; 2025 Smart File Tools</p></footer>
 
   <script>
-    // Elements
-    const dropArea      = document.getElementById('dropArea');
-    const fileInput     = document.getElementById('fileInput');
-    const fileInfo      = document.getElementById('fileInfo');
-    const fileNamesEl   = document.getElementById('fileNames');
-    const compressBtn   = document.getElementById('compressBtn');
-    const downloadZipBtn= document.getElementById('downloadZipBtn');
-    const resetBtn      = document.getElementById('resetBtn');
-    const output        = document.getElementById('output');
-    const progressEl    = document.getElementById('progress');
-    const maxFiles      = 3;
-    let selectedFiles   = [];
-    let compressedFiles = [];
+    const dropArea       = document.getElementById('dropArea');
+    const fileInput      = document.getElementById('fileInput');
+    const fileInfo       = document.getElementById('fileInfo');
+    const fileNamesEl    = document.getElementById('fileNames');
+    const compressBtn    = document.getElementById('compressBtn');
+    const downloadZipBtn = document.getElementById('downloadZipBtn');
+    const resetBtn       = document.getElementById('resetBtn');
+    const output         = document.getElementById('output');
+    const progressEl     = document.getElementById('progress');
+    const maxFiles       = 3;
+    let selectedFiles    = [];
+    let compressedFiles  = [];
 
     // Ensure change always fires
     fileInput.addEventListener('click', () => fileInput.value = '');
 
-    // Click & drag handlers
+    // Open file picker
     dropArea.addEventListener('click', () => fileInput.click());
+
+    // Drag & drop
     dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
     dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
     dropArea.addEventListener('drop', e => {
@@ -70,63 +74,70 @@
       dropArea.classList.remove('hover');
       processFiles(e.dataTransfer.files);
     });
+
+    // Manual select
     fileInput.addEventListener('change', () => processFiles(fileInput.files));
 
     function processFiles(fileList) {
       const allowedExt = /\.(jpe?g|png|gif|webp|bmp)$/i;
-      const newFiles = Array.from(fileList);
-      const valid    = newFiles.filter(f => allowedExt.test(f.name));
-      const invalid  = newFiles.filter(f => !allowedExt.test(f.name));
+      const newFiles   = Array.from(fileList);
+      const valid      = newFiles.filter(f => allowedExt.test(f.name));
+      const invalid    = newFiles.filter(f => !allowedExt.test(f.name));
       if (invalid.length) {
         alert(`Unsupported: ${invalid.map(f => f.name).join(', ')}.\nPlease use JPG/PNG/GIF/WEBP/BMP.`);
       }
+      // merge & dedupe
       selectedFiles = [...selectedFiles, ...valid]
-        .filter((v,i,a) => a.findIndex(t=>t.name===v.name&&t.size===v.size)===i);
+        .filter((v,i,a) => a.findIndex(t => t.name===v.name && t.size===v.size)===i);
+
       if (selectedFiles.length > maxFiles) {
-        alert(`You can only select up to ${maxFiles} images.`);
+        alert(`Up to ${maxFiles} images only.`);
         selectedFiles = selectedFiles.slice(0, maxFiles);
       }
-      // Mirror back into input
+
+      // mirror to input.files
       const dt = new DataTransfer();
       selectedFiles.forEach(f => dt.items.add(f));
       fileInput.files = dt.files;
-      showFileInfo();
+
+      // show
+      if (!selectedFiles.length) {
+        fileInfo.style.display = 'none';
+      } else {
+        fileNamesEl.innerHTML = selectedFiles.map(f => `<li>${f.name}</li>`).join('');
+        fileInfo.style.display = 'flex';
+      }
     }
 
-    function showFileInfo() {
-      if (!selectedFiles.length) return fileInfo.style.display = 'none';
-      fileNamesEl.innerHTML = selectedFiles.map(f=>`<li>${f.name}</li>`).join('');
-      fileInfo.style.display = 'flex';
-    }
-
-    // Compress
+    // Compress loop
     compressBtn.addEventListener('click', async () => {
-      if (!selectedFiles.length) return alert('Select at least one image.');
+      if (!selectedFiles.length) return alert('Please select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
       output.innerHTML = '';
       progressEl.textContent = '';
       downloadZipBtn.style.display = 'none';
       compressedFiles = [];
 
-      for (let i = 0; i < selectedFiles.length; i++) {
+      for (let i=0; i<selectedFiles.length; i++) {
         const file = selectedFiles[i];
         progressEl.textContent = `Compressing ${i+1}/${selectedFiles.length}: ${file.name}`;
-        // read image
+
+        // read
         const dataURL = await new Promise(res => {
           const r = new FileReader();
           r.onload = e => res(e.target.result);
           r.readAsDataURL(file);
         });
         const img = new Image();
-        await new Promise(res => { img.onload = res; img.src = dataURL; });
+        await new Promise(res => { img.onload=res; img.src=dataURL; });
 
-        // draw to canvas
+        // draw
         const canvas = document.createElement('canvas');
         canvas.width  = img.width;
         canvas.height = img.height;
-        canvas.getContext('2d').drawImage(img, 0, 0);
+        canvas.getContext('2d').drawImage(img,0,0);
 
-        // determine output mime
+        // format
         let mime = file.type;
         if (!['image/png','image/jpeg','image/webp'].includes(mime)) mime = 'image/jpeg';
 
@@ -134,42 +145,43 @@
           canvas.toBlob(res, mime, quality);
         });
 
-        // size comparison
+        // size show
         const origKB = (file.size/1024).toFixed(1);
         const compKB = (blob.size/1024).toFixed(1);
-
-        // link for individual download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const name = file.name.replace(/\.[^/.]+$/,'');
-        const ext  = mime.split('/')[1];
-        a.download = `${name}-compressed.${ext}`;
-        a.href     = url;
-        a.textContent = `${file.name} (${origKB}KB → ${compKB}KB)`;
-        a.className = 'download-btn';
+        const url    = URL.createObjectURL(blob);
+        const a      = document.createElement('a');
+        const name   = file.name.replace(/\.[^/.]+$/,'');
+        const ext    = mime.split('/')[1];
+        a.download   = `${name}-compressed.${ext}`;
+        a.href       = url;
+        a.textContent= `${file.name} (${origKB}KB → ${compKB}KB)`;
+        a.className  = 'download-btn';
         output.appendChild(a);
         output.appendChild(document.createElement('br'));
 
-        // store for ZIP
-        compressedFiles.push({ name: `${name}-compressed.${ext}`, blob });
+        compressedFiles.push({ name:`${name}-compressed.${ext}`, blob });
       }
 
       progressEl.textContent = 'Compression complete.';
       downloadZipBtn.style.display = 'inline-block';
     });
 
-    // Download ZIP
+    // ZIP
     downloadZipBtn.addEventListener('click', async () => {
       if (!compressedFiles.length) return;
       progressEl.textContent = 'Generating ZIP…';
       const zip = new JSZip();
       compressedFiles.forEach(f => zip.file(f.name, f.blob));
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(zipBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'compressed_images.zip';
+      const zipBlob = await zip.generateAsync({ type:'blob' });
+      const url     = URL.createObjectURL(zipBlob);
+      const a       = document.createElement('a');
+      a.href        = url;
+      a.download    = 'compressed_images.zip';
+      a.style.display='none';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
       progressEl.textContent = '';
     });
 
