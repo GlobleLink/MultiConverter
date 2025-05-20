@@ -21,11 +21,11 @@
   </header>
 
   <main class="subpage">
-    <!-- Tips: upload limit, supported formats, output format -->
+    <!-- Tips -->
     <p class="upload-info">
       You can upload up to <strong>3 images</strong> per batch.<br/>
-      <span class="highlight">Supported formats: JPG, PNG, GIF, WEBP, BMP.</span><br/>
-      Compressed files will be downloaded as <strong>JPEG</strong> images.
+      <span class="highlight">Supported: JPG, PNG, GIF, WEBP, BMP</span><br/>
+      Compressed files download as <strong>JPEG</strong>.
     </p>
 
     <!-- Drag & Drop Zone -->
@@ -33,15 +33,14 @@
       <div class="icon">
         <img src="icons/image.svg" alt="Image Icon">
       </div>
-      <p>Drag & drop images here, or click to select</p>
-      <!-- key: multiple 属性 -->
+      <p>Drag & drop images here, or click / double-click to select</p>
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
     <!-- Uploaded File Info -->
     <div class="file-info" id="fileInfo" style="display:none;">
-      <img src="icons/image.svg" class="file-icon" alt="Uploaded Icon">
-      <span id="fileName"></span>
+      <img src="icons/image.svg" class="file-icon" alt="">
+      <ul id="fileNames" class="file-names"></ul>
     </div>
 
     <!-- Quality Selector -->
@@ -70,23 +69,31 @@
     const dropArea    = document.getElementById('dropArea');
     const fileInput   = document.getElementById('fileInput');
     const fileInfo    = document.getElementById('fileInfo');
-    const fileNameEl  = document.getElementById('fileName');
+    const fileNamesEl = document.getElementById('fileNames');
     const compressBtn = document.getElementById('compressBtn');
     const output      = document.getElementById('output');
     const maxFiles    = 3;
 
-    // Drag & drop + click upload
+    // Click & double-click to open
     dropArea.addEventListener('click',   () => fileInput.click());
-    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
-    dropArea.addEventListener('dragleave',() => dropArea.classList.remove('hover'));
-    dropArea.addEventListener('drop',    e => {
+    dropArea.addEventListener('dblclick',() => fileInput.click());
+
+    // Drag & drop
+    dropArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropArea.classList.add('hover');
+    });
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('hover');
+    });
+    dropArea.addEventListener('drop', e => {
       e.preventDefault();
       dropArea.classList.remove('hover');
       fileInput.files = e.dataTransfer.files;
       handleFiles();
     });
 
-    // Handle manual selection
+    // Manual select
     fileInput.addEventListener('change', handleFiles);
 
     function handleFiles() {
@@ -101,17 +108,19 @@
         fileInfo.style.display = 'none';
         return;
       }
-      // Show file count
-      fileNameEl.textContent = `${files.length} file${files.length > 1 ? 's' : ''} selected`;
+      // Show names
+      fileNamesEl.innerHTML = files
+        .map(f => `<li>${f.name}</li>`)
+        .join('');
       fileInfo.style.display = 'flex';
     }
 
-    // Batch compression logic
+    // Batch compression
     compressBtn.addEventListener('click', () => {
       const files = Array.from(fileInput.files);
       if (!files.length) return alert('Please select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
-      output.innerHTML = '';  // clear previous results
+      output.innerHTML = '';
 
       files.forEach(file => {
         const reader = new FileReader();
