@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Compression • Smart File Tools</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <!-- Sub-navigation -->
+  <nav class="sub-nav">
+    <a href="index.html" class="back">← Back to Home</a>
+    <a href="image-compression.html" class="active">Image Compression</a>
+    <a href="video-compression.html">Video Compression</a>
+    <a href="image-conversion.html">Image Conversion</a>
+    <a href="pdf-compression.html">PDF Compression</a>
+  </nav>
+
+  <header class="sub-header">
+    <h1>Image Compression</h1>
+  </header>
+
+  <main class="subpage">
+    <!-- Drag & Drop Zone -->
+    <div class="drop-area" id="dropArea">
+      <div class="icon">
+        <img src="icons/image.svg" alt="Image Icon">
+      </div>
+      <p>Drag & drop an image here, or click to select</p>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <!-- Uploaded File Info -->
+    <div class="file-info" id="fileInfo" style="display:none;">
+      <img src="icons/image.svg" class="file-icon" alt="Uploaded Icon">
+      <span id="fileName"></span>
+    </div>
+
+    <!-- Quality Selector -->
+    <div class="quality-options">
+      <label><input type="radio" name="quality" value="0.3"> Low</label>
+      <label><input type="radio" name="quality" value="0.6" checked> Medium</label>
+      <label><input type="radio" name="quality" value="0.9"> High</label>
+    </div>
+
+    <!-- Compress Button -->
+    <button id="compressBtn" class="action-btn">Compress Image</button>
+
+    <!-- Result Display -->
+    <section class="result">
+      <h2>Result</h2>
+      <div id="output"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Smart File Tools</p>
+  </footer>
+
+  <script>
+    // Elements
+    const dropArea  = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo  = document.getElementById('fileInfo');
+    const fileName  = document.getElementById('fileName');
+    const compressBtn = document.getElementById('compressBtn');
+    const output    = document.getElementById('output');
+
+    // Drag & drop + click upload
+    dropArea.addEventListener('click',   () => fileInput.click());
+    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
+    dropArea.addEventListener('dragleave',() => dropArea.classList.remove('hover'));
+    dropArea.addEventListener('drop',    e => {
+      e.preventDefault();
+      dropArea.classList.remove('hover');
+      fileInput.files = e.dataTransfer.files;
+      showFileInfo();
+    });
+
+    // Show file info on manual select
+    fileInput.addEventListener('change', showFileInfo);
+
+    function showFileInfo() {
+      const file = fileInput.files[0];
+      if (!file) return;
+      fileName.textContent = file.name;
+      fileInfo.style.display = 'flex';
+    }
+
+    // Compression logic
+    compressBtn.addEventListener('click', () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        return alert('Please select an image.');
+      }
+      const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width  = img.width;
+          canvas.height = img.height;
+          canvas.getContext('2d').drawImage(img, 0, 0);
+          canvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            output.innerHTML =
+              `<a href="${url}" download="compressed.jpg" class="download-btn">Download Compressed Image</a>`;
+          }, 'image/jpeg', quality);
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
