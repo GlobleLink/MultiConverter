@@ -28,6 +28,7 @@
       *Click “Select Files” multiple times to add more.
     </p>
 
+    <!-- Drag & Drop Zone -->
     <div class="drop-area" id="dropArea">
       <div class="icon">
         <img src="icons/image.svg" alt="Image Icon">
@@ -36,22 +37,26 @@
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
+    <!-- Uploaded File Info -->
     <div class="file-info" id="fileInfo" style="display:none;">
       <img src="icons/image.svg" class="file-icon" alt="">
       <ul id="fileNames" class="file-names"></ul>
     </div>
 
+    <!-- Quality Selector -->
     <div class="quality-options">
       <label><input type="radio" name="quality" value="0.3"> Low</label>
       <label><input type="radio" name="quality" value="0.6" checked> Medium</label>
       <label><input type="radio" name="quality" value="0.9"> High</label>
     </div>
 
+    <!-- Actions: Compress + Reset -->
     <div class="actions">
       <button id="compressBtn" class="action-btn">Compress Images</button>
       <button id="resetBtn"    class="action-btn reset-btn">Reset</button>
     </div>
 
+    <!-- Result Display -->
     <section class="result">
       <h2>Result</h2>
       <div id="output"></div>
@@ -73,7 +78,12 @@
     const maxFiles    = 3;
     let selectedFiles = [];
 
-    // 点击打开
+    // 每次点击都重置 value，确保相同文件也能触发 change
+    fileInput.addEventListener('click', () => {
+      fileInput.value = '';
+    });
+
+    // 点击打开文件对话框
     dropArea.addEventListener('click', () => fileInput.click());
 
     // 拖拽
@@ -81,9 +91,7 @@
       e.preventDefault();
       dropArea.classList.add('hover');
     });
-    dropArea.addEventListener('dragleave', () => {
-      dropArea.classList.remove('hover');
-    });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
     dropArea.addEventListener('drop', e => {
       e.preventDefault();
       dropArea.classList.remove('hover');
@@ -96,7 +104,6 @@
     function processFiles(fileList) {
       const allowedExt = /\.(jpe?g|png|gif|webp|bmp)$/i;
       const newFiles = Array.from(fileList);
-      // 拆分合法与非法
       const validFiles = newFiles.filter(f => allowedExt.test(f.name));
       const invalidFiles = newFiles.filter(f => !allowedExt.test(f.name));
 
@@ -107,7 +114,7 @@
         );
       }
 
-      // 合并、去重
+      // 合并并去重
       selectedFiles = [...selectedFiles, ...validFiles]
         .filter((v,i,a) => a.findIndex(t => t.name===v.name && t.size===v.size)===i);
 
@@ -117,7 +124,7 @@
         selectedFiles = selectedFiles.slice(0, maxFiles);
       }
 
-      // 同步回 input.files
+      // 将 selectedFiles 回写到 input.files
       const dt = new DataTransfer();
       selectedFiles.forEach(f => dt.items.add(f));
       fileInput.files = dt.files;
@@ -130,12 +137,11 @@
         fileInfo.style.display = 'none';
         return;
       }
-      fileNamesEl.innerHTML = selectedFiles
-        .map(f => `<li>${f.name}</li>`).join('');
+      fileNamesEl.innerHTML = selectedFiles.map(f => `<li>${f.name}</li>`).join('');
       fileInfo.style.display = 'flex';
     }
 
-    // 压缩
+    // 批量压缩
     compressBtn.addEventListener('click', () => {
       if (!selectedFiles.length) return alert('Please select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
