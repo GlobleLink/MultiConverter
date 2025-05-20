@@ -21,11 +21,11 @@
   </header>
 
   <main class="subpage">
-    <!-- Tips -->
     <p class="upload-info">
       You can upload up to <strong>3 images</strong> per batch.<br/>
-      <span class="highlight">Supported: JPG, PNG, GIF, WEBP, BMP</span><br/>
-      Compressed files download as <strong>JPEG</strong>.
+      <span class="highlight">Supported formats:</span> JPG, PNG, GIF, WEBP, BMP.<br/>
+      Compressed files download as <strong>JPEG</strong>.<br/>
+      *Click “Select Files” multiple times to add more.
     </p>
 
     <!-- Drag & Drop Zone -->
@@ -33,7 +33,7 @@
       <div class="icon">
         <img src="icons/image.svg" alt="Image Icon">
       </div>
-      <p>Drag & drop images here, or click / double-click to select</p>
+      <p>Drag & drop images here, or click to select</p>
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
@@ -65,7 +65,6 @@
   </footer>
 
   <script>
-    // Elements
     const dropArea    = document.getElementById('dropArea');
     const fileInput   = document.getElementById('fileInput');
     const fileInfo    = document.getElementById('fileInfo');
@@ -73,56 +72,57 @@
     const compressBtn = document.getElementById('compressBtn');
     const output      = document.getElementById('output');
     const maxFiles    = 3;
+    let selectedFiles = [];
 
-    // Click & double-click to open
-    dropArea.addEventListener('click',   () => fileInput.click());
-    dropArea.addEventListener('dblclick',() => fileInput.click());
+    // Click to open file dialog
+    dropArea.addEventListener('click', () => fileInput.click());
 
     // Drag & drop
-    dropArea.addEventListener('dragover', e => {
-      e.preventDefault();
-      dropArea.classList.add('hover');
-    });
-    dropArea.addEventListener('dragleave', () => {
-      dropArea.classList.remove('hover');
-    });
+    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
     dropArea.addEventListener('drop', e => {
       e.preventDefault();
       dropArea.classList.remove('hover');
-      fileInput.files = e.dataTransfer.files;
-      handleFiles();
+      mergeFiles(e.dataTransfer.files);
     });
 
-    // Manual select
-    fileInput.addEventListener('change', handleFiles);
+    // Manual selection
+    fileInput.addEventListener('change', () => mergeFiles(fileInput.files));
 
-    function handleFiles() {
-      const files = Array.from(fileInput.files);
-      if (files.length === 0) {
+    function mergeFiles(fileList) {
+      const newFiles = Array.from(fileList);
+      // 合并去重
+      selectedFiles = [...selectedFiles, ...newFiles].filter((v,i,a) =>
+        a.findIndex(t => t.name === v.name && t.size===v.size) === i
+      );
+      if (selectedFiles.length > maxFiles) {
+        alert(`You can only select up to ${maxFiles} images.`);
+        selectedFiles = selectedFiles.slice(0, maxFiles);
+      }
+      // 更新 fileInput.files via DataTransfer
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      fileInput.files = dt.files;
+      showFileInfo();
+    }
+
+    function showFileInfo() {
+      if (!selectedFiles.length) {
         fileInfo.style.display = 'none';
         return;
       }
-      if (files.length > maxFiles) {
-        alert(`You can only select up to ${maxFiles} images at once.`);
-        fileInput.value = '';
-        fileInfo.style.display = 'none';
-        return;
-      }
-      // Show names
-      fileNamesEl.innerHTML = files
-        .map(f => `<li>${f.name}</li>`)
-        .join('');
+      fileNamesEl.innerHTML = selectedFiles.map(f =>
+        `<li>${f.name}</li>`
+      ).join('');
       fileInfo.style.display = 'flex';
     }
 
-    // Batch compression
+    // Compression logic
     compressBtn.addEventListener('click', () => {
-      const files = Array.from(fileInput.files);
-      if (!files.length) return alert('Please select at least one image.');
+      if (!selectedFiles.length) return alert('Please select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
       output.innerHTML = '';
-
-      files.forEach(file => {
+      selectedFiles.forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
           const img = new Image();
