@@ -28,7 +28,6 @@
       *Click “Select Files” multiple times to add more.
     </p>
 
-    <!-- Drag & Drop Zone -->
     <div class="drop-area" id="dropArea">
       <div class="icon">
         <img src="icons/image.svg" alt="Image Icon">
@@ -37,23 +36,22 @@
       <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
-    <!-- Uploaded File Info -->
     <div class="file-info" id="fileInfo" style="display:none;">
       <img src="icons/image.svg" class="file-icon" alt="">
       <ul id="fileNames" class="file-names"></ul>
     </div>
 
-    <!-- Quality Selector -->
     <div class="quality-options">
       <label><input type="radio" name="quality" value="0.3"> Low</label>
       <label><input type="radio" name="quality" value="0.6" checked> Medium</label>
       <label><input type="radio" name="quality" value="0.9"> High</label>
     </div>
 
-    <!-- Compress Button -->
-    <button id="compressBtn" class="action-btn">Compress Images</button>
+    <div class="actions">
+      <button id="compressBtn" class="action-btn">Compress Images</button>
+      <button id="resetBtn"    class="action-btn reset-btn">Reset</button>
+    </div>
 
-    <!-- Result Display -->
     <section class="result">
       <h2>Result</h2>
       <div id="output"></div>
@@ -70,39 +68,60 @@
     const fileInfo    = document.getElementById('fileInfo');
     const fileNamesEl = document.getElementById('fileNames');
     const compressBtn = document.getElementById('compressBtn');
+    const resetBtn    = document.getElementById('resetBtn');
     const output      = document.getElementById('output');
     const maxFiles    = 3;
     let selectedFiles = [];
 
-    // Click to open file dialog
+    // 点击打开
     dropArea.addEventListener('click', () => fileInput.click());
 
-    // Drag & drop
-    dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('hover'); });
-    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('hover'));
+    // 拖拽
+    dropArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropArea.classList.add('hover');
+    });
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('hover');
+    });
     dropArea.addEventListener('drop', e => {
       e.preventDefault();
       dropArea.classList.remove('hover');
-      mergeFiles(e.dataTransfer.files);
+      processFiles(e.dataTransfer.files);
     });
 
-    // Manual selection
-    fileInput.addEventListener('change', () => mergeFiles(fileInput.files));
+    // 手动选择
+    fileInput.addEventListener('change', () => processFiles(fileInput.files));
 
-    function mergeFiles(fileList) {
+    function processFiles(fileList) {
+      const allowedExt = /\.(jpe?g|png|gif|webp|bmp)$/i;
       const newFiles = Array.from(fileList);
-      // 合并去重
-      selectedFiles = [...selectedFiles, ...newFiles].filter((v,i,a) =>
-        a.findIndex(t => t.name === v.name && t.size===v.size) === i
-      );
+      // 拆分合法与非法
+      const validFiles = newFiles.filter(f => allowedExt.test(f.name));
+      const invalidFiles = newFiles.filter(f => !allowedExt.test(f.name));
+
+      if (invalidFiles.length) {
+        alert(
+          `Unsupported file type: ${invalidFiles.map(f => f.name).join(', ')}.\n` +
+          'Please select only JPG, PNG, GIF, WEBP or BMP images.'
+        );
+      }
+
+      // 合并、去重
+      selectedFiles = [...selectedFiles, ...validFiles]
+        .filter((v,i,a) => a.findIndex(t => t.name===v.name && t.size===v.size)===i);
+
+      // 限制数量
       if (selectedFiles.length > maxFiles) {
         alert(`You can only select up to ${maxFiles} images.`);
         selectedFiles = selectedFiles.slice(0, maxFiles);
       }
-      // 更新 fileInput.files via DataTransfer
+
+      // 同步回 input.files
       const dt = new DataTransfer();
       selectedFiles.forEach(f => dt.items.add(f));
       fileInput.files = dt.files;
+
       showFileInfo();
     }
 
@@ -111,13 +130,12 @@
         fileInfo.style.display = 'none';
         return;
       }
-      fileNamesEl.innerHTML = selectedFiles.map(f =>
-        `<li>${f.name}</li>`
-      ).join('');
+      fileNamesEl.innerHTML = selectedFiles
+        .map(f => `<li>${f.name}</li>`).join('');
       fileInfo.style.display = 'flex';
     }
 
-    // Compression logic
+    // 压缩
     compressBtn.addEventListener('click', () => {
       if (!selectedFiles.length) return alert('Please select at least one image.');
       const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
@@ -131,12 +149,12 @@
             const canvas = document.createElement('canvas');
             canvas.width  = img.width;
             canvas.height = img.height;
-            canvas.getContext('2d').drawImage(img, 0, 0);
+            canvas.getContext('2d').drawImage(img,0,0);
             canvas.toBlob(blob => {
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              const name = file.name.replace(/\.[^/.]+$/, '');
+              const name = file.name.replace(/\.[^/.]+$/,'');
               a.download = name + '-compressed.jpg';
               a.textContent = 'Download ' + file.name;
               a.className = 'download-btn';
@@ -147,6 +165,15 @@
         };
         reader.readAsDataURL(file);
       });
+    });
+
+    // 重置
+    resetBtn.addEventListener('click', () => {
+      selectedFiles = [];
+      fileInput.value = '';
+      fileInfo.style.display = 'none';
+      output.innerHTML = '';
+      document.querySelector('input[name="quality"][value="0.6"]').checked = true;
     });
   </script>
 </body>
