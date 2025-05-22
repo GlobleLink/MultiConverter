@@ -1,13 +1,13 @@
 // video-compression.js
 
-// —— 1. 引入并初始化 FFmpeg —— //
+// —— 1. 初始化 & 变量 —— //
 const { createFFmpeg, fetchFile } = FFmpeg;
 const ffmpeg = createFFmpeg({
   log: true,
   corePath: 'https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg-core.js'
 });
 
-// —— 2. 拿到 DOM 元素 —— //
+const MAX_FILES    = 3;
 const fileInput    = document.getElementById('fileInput');
 const dropArea     = document.getElementById('dropArea');
 const fileListEl   = document.getElementById('fileList');
@@ -17,22 +17,21 @@ const resetBtn     = document.getElementById('resetBtn');
 const progressEl   = document.getElementById('progress');
 const outputEl     = document.getElementById('output');
 
-const MAX_FILES = 3;
 let selectedFiles = [];
 let resultBlobs   = [];
 
-// —— 3. 文件选择 & 列表渲染 —— //
+// —— 2. 选文件 & 渲染列表 —— //
 function renderFileList() {
   fileListEl.innerHTML = '';
-  selectedFiles.forEach((f, i) => {
+  selectedFiles.forEach((file, i) => {
     const div = document.createElement('div');
     div.className = 'file-item';
     div.innerHTML = `
       <svg viewBox="0 0 24 24" class="file-icon">
         <path fill="none" stroke="var(--color-primary)" stroke-width="2"
-              d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
+          d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
       </svg>
-      <span class="file-name">${f.name}</span>
+      <span class="file-name">${file.name}</span>
       <button class="remove-btn" data-i="${i}">×</button>
     `;
     fileListEl.appendChild(div);
@@ -46,12 +45,12 @@ function renderFileList() {
 }
 
 function handleFiles(files) {
-  const incoming = Array.from(files);
+  const arr = Array.from(files);
   const space = MAX_FILES - selectedFiles.length;
-  if (incoming.length > space) {
+  if (arr.length > space) {
     alert('Slow down, superstar! Only 3 videos at once—drop a file before adding more ✨');
   }
-  incoming.slice(0, space).forEach(f => {
+  arr.slice(0, space).forEach(f => {
     if (!selectedFiles.find(x => x.name === f.name)) {
       selectedFiles.push(f);
     }
@@ -59,6 +58,7 @@ function handleFiles(files) {
   renderFileList();
 }
 
+// 点/拖事件
 dropArea.addEventListener('click', () => fileInput.click());
 ['dragenter','dragover','dragleave','drop'].forEach(evt => {
   dropArea.addEventListener(evt, e => {
@@ -69,8 +69,10 @@ dropArea.addEventListener('click', () => fileInput.click());
 dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
+// Reset
 resetBtn.onclick = () => {
-  selectedFiles = []; resultBlobs = [];
+  selectedFiles = [];
+  resultBlobs   = [];
   fileListEl.innerHTML = '';
   outputEl.innerHTML   = '';
   progressEl.textContent = 'Waiting for upload…';
@@ -78,15 +80,14 @@ resetBtn.onclick = () => {
   downloadBtn.disabled     = true;
 };
 
-// —— 4. 点击 Compress —— //
+// —— 3. 压缩逻辑 —— //
 compressBtn.onclick = async () => {
-  if (selectedFiles.length === 0) {
-    return alert('Please select at least one video 😊');
-  }
+  if (!selectedFiles.length) return alert('Please select at least one video 😊');
 
   compressBtn.disabled = resetBtn.disabled = true;
   outputEl.innerHTML   = '';
-  progressEl.textContent = 'Loading FFmpeg core…';
+  progressEl.textContent = 'Loading FFmpeg…';
+
   await ffmpeg.load();
 
   const crf = document.querySelector('input[name="quality"]:checked').value;
@@ -99,7 +100,8 @@ compressBtn.onclick = async () => {
     resultBlobs.push({ blob, name: blob.name, origSize, newSize });
   }
 
-  progressEl.textContent = 'Compression complete! Choose download:';
+  // 显示结果
+  progressEl.textContent = 'Compression complete! Choose download option.';
   const ul = document.createElement('ul');
   resultBlobs.forEach(r => {
     const li = document.createElement('li');
@@ -112,14 +114,15 @@ compressBtn.onclick = async () => {
   });
   outputEl.appendChild(ul);
 
+  // 单文件下载
   ul.querySelectorAll('.single-download').forEach(a => {
     a.onclick = e => {
       e.preventDefault();
       const info = resultBlobs.find(x => x.name === e.currentTarget.dataset.name);
       const url  = URL.createObjectURL(info.blob);
       const link = document.createElement('a');
-      link.href    = url;
-      link.download= info.name;
+      link.href     = url;
+      link.download = info.name;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -127,12 +130,13 @@ compressBtn.onclick = async () => {
     };
   });
 
+  // 批量 ZIP
   downloadBtn.style.display = 'inline-block';
   downloadBtn.disabled     = false;
   downloadBtn.onclick = async () => {
     const zip = new JSZip();
     resultBlobs.forEach(r => zip.file(r.name, r.blob));
-    progressEl.textContent = 'Creating ZIP…';
+    progressEl.textContent = 'Packaging ZIP…';
     const blob = await zip.generateAsync({ type: 'blob' });
     saveAs(blob, 'videos-compressed.zip');
   };
@@ -140,7 +144,7 @@ compressBtn.onclick = async () => {
   compressBtn.disabled = resetBtn.disabled = false;
 };
 
-// —— 5. 单文件压缩函数 —— //
+// —— 4. 单文件压缩函数 —— //
 async function compressOne(file, crf) {
   const ext  = file.name.split('.').pop().toLowerCase();
   const base = file.name.replace(/\.[^/.]+$/, '');
@@ -155,7 +159,7 @@ async function compressOne(file, crf) {
 
   const data = ffmpeg.FS('readFile', out);
   const blob = new Blob([data.buffer], { type: file.type });
-  blob.name  = out;
+  blob.name = out;
 
   return { blob, origSize: file.size, newSize: blob.size };
 }
