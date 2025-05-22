@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Image Compression • Smart File Tools</title>
+  <!-- 全局样式，仅首页和公共变量 -->
   <link rel="stylesheet" href="style.css" />
+  <!-- 本页专属样式，独立于首页 -->
+  <link rel="stylesheet" href="image-compression.css" />
 </head>
 <body>
+  <!-- Header -->
   <header class="header">
     <h1>Smart File Tools</h1>
-    <p class="subtitle">
-      Compress & Convert Images, Videos, Audio & Documents Instantly
-    </p>
+    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
   </header>
 
+  <!-- 二级导航 -->
   <nav class="sub-nav">
     <a href="index.html">← Back to Home</a>
     <a href="image-compression.html" class="active">Image Compression</a>
@@ -22,6 +25,7 @@
     <a href="audio-compression.html">Audio Compression</a>
   </nav>
 
+  <!-- 主内容 -->
   <main class="container">
     <h2>Image Compression</h2>
     <p class="upload-info">
@@ -36,12 +40,12 @@
     <div class="drop-area" id="dropArea">
       <svg class="drop-icon" viewBox="0 0 24 24">
         <rect x="3" y="3" width="18" height="18" rx="2"
-          stroke="var(--color-primary)" stroke-width="2" fill="none"/>
+              stroke="var(--color-primary)" stroke-width="2" fill="none"/>
         <circle cx="8" cy="8" r="1.5" fill="var(--color-primary)"/>
         <path d="M3 21L8.5 13L13.5 17.5L21 9V21H3Z"
-          fill="var(--color-primary)"/>
+              fill="var(--color-primary)"/>
       </svg>
-      <p>Drag & drop images here, or click to select</p>
+      <p>Drag &amp; drop images here, or click to select</p>
       <input
         type="file"
         id="fileInput"
@@ -60,8 +64,10 @@
 
     <div class="actions">
       <button id="compressBtn" class="btn btn-primary">Compress Images</button>
-      <button id="downloadZipBtn" class="btn btn-primary"
-              style="display:none;" disabled>
+      <button id="downloadZipBtn"
+              class="btn btn-primary"
+              style="display:none;"
+              disabled>
         Download ZIP
       </button>
       <button id="resetBtn" class="btn btn-secondary">Reset</button>
@@ -71,6 +77,7 @@
     <div id="output" class="output"></div>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     <p>&copy; 2025 Smart File Tools</p>
   </footer>
