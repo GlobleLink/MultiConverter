@@ -1,27 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Image Compression • Smart File Tools</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
+  <!-- 引入全局样式 -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- 公共头部 (同 index.html) -->
+  <header class="home-header">
+    <h1>Smart File Tools</h1>
+    <p>Compress & Convert Images, Videos, Audio & Documents Instantly</p>
+  </header>
+
+  <!-- 二级导航 -->
   <nav class="sub-nav">
-    <a href="index.html" class="back">← Back to Home</a>
+    <a href="index.html">← Back to Home</a>
     <a href="image-compression.html" class="active">Image Compression</a>
     <a href="video-compression.html">Video Compression</a>
     <a href="pdf-compression.html">PDF Compression</a>
     <a href="audio-compression.html">Audio Compression</a>
   </nav>
 
-  <header class="sub-header"><h1>Image Compression</h1></header>
-
+  <!-- 主体内容 -->
   <main class="subpage">
-    <!-- 同前面版本的完整 UI & JS 逻辑 -->
-    <!-- ...（复制之前提供的 image-compression.html 整段代码） -->
+
+    <!-- 页面标题 -->
+    <h2>Image Compression</h2>
+
+    <!-- 上传说明 -->
+    <p class="upload-info">
+      You can upload up to <strong>3 images</strong> per batch.<br>
+      <span class="highlight">Supported formats:</span> JPG, PNG, GIF, WEBP, BMP.<br>
+      Compressed files remain in the <strong>same format</strong>.<br>
+      *Click “Select Files” multiple times to add more.*
+    </p>
+
+    <!-- 拖拽 & 选择区 -->
+    <div class="drop-area" id="dropArea">
+      <div class="icon">
+        <!-- 内联 SVG 图标 -->
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke="#58d3f7" stroke-width="2"/>
+          <circle cx="8" cy="8" r="1.5" fill="#58d3f7"/>
+          <path d="M3 21L8.5 13L13.5 17.5L21 9V21H3Z" fill="#58d3f7"/>
+        </svg>
+      </div>
+      <p>Drag & drop images here, or click to select</p>
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp,image/bmp" multiple>
+    </div>
+
+    <!-- 已选文件列表 -->
+    <div class="file-info" id="fileInfo" style="display:none;">
+      <div class="file-icon">
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="18" height="18" rx="2" stroke="#58d3f7" stroke-width="2"/>
+          <circle cx="8" cy="8" r="1.5" fill="#58d3f7"/>
+          <path d="M3 21L8.5 13L13.5 17.5L21 9V21H3Z" fill="#58d3f7"/>
+        </svg>
+      </div>
+      <ul class="file-names" id="fileNames"></ul>
+    </div>
+
+    <!-- 质量选项 -->
+    <div class="quality-options">
+      <label><input type="radio" name="quality" value="0.3"> Low</label>
+      <label><input type="radio" name="quality" value="0.6" checked> Medium</label>
+      <label><input type="radio" name="quality" value="0.9"> High</label>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="actions">
+      <button class="action-btn" id="compressBtn">Compress Images</button>
+      <button class="action-btn zip-btn" id="downloadZipBtn" style="display:none;">Download ZIP</button>
+      <button class="action-btn reset-btn" id="resetBtn">Reset</button>
+    </div>
+
+    <!-- 进度提示 -->
+    <div id="progress">Waiting for upload…</div>
+
+    <!-- 结果输出 -->
+    <div id="output"></div>
+
   </main>
 
-  <footer><p>&copy; 2025 Smart File Tools</p></footer>
+  <!-- 公共底部 -->
+  <footer>
+    <p>&copy; 2025 Smart File Tools</p>
+  </footer>
+
+  <!-- 引入全局脚本 -->
+  <script src="script.js"></script>
 </body>
 </html>
