@@ -125,3 +125,16 @@ body {
 .footer {
   text-align: center; padding: 2rem 1rem 1rem; color: var(--color-link); font-size: .9rem;
 }
+/* 让整个拖拽区都能触发文件选择 */
+.drop-area {
+  position: relative;
+}
+
+/* 完全覆盖 .drop-area，让点击 anywhere 都能点到 input */
+.drop-area input[type="file"] {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}

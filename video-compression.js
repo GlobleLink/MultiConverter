@@ -1,7 +1,10 @@
-// 引入 FFmpeg.wasm 全局对象
+// video-compression.js
+
+// 1. 初始化 FFmpeg.wasm
 const { createFFmpeg, fetchFile } = FFmpeg;
 const ffmpeg = createFFmpeg({ log: true });
 
+// 2. 获取 DOM 元素
 const fileInput   = document.getElementById('fileInput');
 const dropArea    = document.getElementById('dropArea');
 const fileList    = document.getElementById('fileList');
@@ -14,16 +17,21 @@ const output      = document.getElementById('output');
 let selectedFile = null;
 let resultBlob   = null;
 
-// 拖拽 & 选取
+// 3. 让整个拖拽区可点击打开文件对话框
+dropArea.addEventListener('click', () => fileInput.click());
+
+// 4. 拖拽 & 选取 文件 监听
 ['dragenter','dragover','dragleave','drop'].forEach(evt => {
   dropArea.addEventListener(evt, e => {
     e.preventDefault(); e.stopPropagation();
-    dropArea.classList.toggle('dragover', evt==='dragover');
+    if (evt === 'dragover') dropArea.classList.add('dragover');
+    if (evt === 'dragleave' || evt === 'drop') dropArea.classList.remove('dragover');
   });
 });
 dropArea.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
+// 5. 处理用户选中文件
 function handleFile(file) {
   if (!file) return;
   selectedFile = file;
@@ -39,19 +47,19 @@ function handleFile(file) {
   `;
 }
 
-// 重置
+// 6. 重置所有状态
 function resetAll() {
   selectedFile = null;
   resultBlob   = null;
-  fileList.innerHTML = '';
+  fileList.innerHTML      = '';
   downloadBtn.style.display = 'none';
-  downloadBtn.disabled     = true;
-  progress.textContent     = 'Waiting for upload…';
-  output.innerHTML         = '';
+  downloadBtn.disabled      = true;
+  progress.textContent      = 'Waiting for upload…';
+  output.innerHTML          = '';
 }
 resetBtn.addEventListener('click', resetAll);
 
-// 点击压缩
+// 7. 点击“Compress Video”按钮
 compressBtn.addEventListener('click', async () => {
   if (!selectedFile) {
     alert('Please select a video 😊');
@@ -61,11 +69,8 @@ compressBtn.addEventListener('click', async () => {
   progress.textContent = 'Loading FFmpeg…';
   await ffmpeg.load();
 
-  // 读取 CRF 值
   const qualityCRF = document.querySelector('input[name="quality"]:checked').value;
-
-  // 执行压缩
-  const { blob, origSize, newSize, outputName } =
+  const { blob, origSize, newSize } =
         await compressSingle(selectedFile, qualityCRF);
 
   resultBlob = blob;
@@ -82,43 +87,37 @@ compressBtn.addEventListener('click', async () => {
   compressBtn.disabled = resetBtn.disabled = false;
 });
 
-// 单文件下载
+// 8. 下载压缩后的视频
 downloadBtn.addEventListener('click', () => {
   if (!resultBlob) return;
   const url = URL.createObjectURL(resultBlob);
   const link = document.createElement('a');
   link.href = url;
-  // download 属性保持与源文件相同的后缀
-  link.download = resultBlob.name || selectedFile.name.replace(/\.[^/.]+$/, '') + '-compressed.' + getExt(selectedFile.name);
+  link.download = resultBlob.name;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 });
 
-/**
- * 压缩单个视频，保持同格式输出
- * @param {File} file      原始视频文件
- * @param {string} qualityCRF CRF 数值（越小质量越高）
- * @returns {Promise<{blob:Blob, origSize:number, newSize:number, outputName:string}>}
- */
+// 9. 核心压缩函数：保持同格式输出
 async function compressSingle(file, qualityCRF) {
-  // 1. 提取扩展名和输出文件名
-  const ext = getExt(file.name);                      // e.g. "mp4", "mov"
-  const base = file.name.replace(/\.[^/.]+$/, '');
-  const outputName = `${base}-compressed.${ext}`;
+  const ext       = getExt(file.name);                    // e.g. "mp4", "mov"
+  const base      = file.name.replace(/\.[^/.]+$/, '');
+  const outputName= `${base}-compressed.${ext}`;
 
-  // 2. 写入 FFmpeg 文件系统
+  // 写入虚拟文件系统
   ffmpeg.FS('writeFile', file.name, await fetchFile(file));
 
-  // 3. 根据 ext 动态选择视频编码器
+  // 根据扩展名选择编码器
   let vcodec = 'libx264';
   if (ext === 'webm')      vcodec = 'libvpx-vp9';
   else if (ext === 'avi')  vcodec = 'libx264';
   else if (ext === 'mov')  vcodec = 'libx264';
-  // （如需支持更多容器，可在此分支添加）
+  else if (ext === 'wmv')  vcodec = 'libx264';
+  else if (ext === 'mkv')  vcodec = 'libx264';
 
-  // 4. 执行转码
+  // 执行 FFmpeg 命令
   await ffmpeg.run(
     '-i', file.name,
     '-c:v', vcodec,
@@ -126,21 +125,19 @@ async function compressSingle(file, qualityCRF) {
     outputName
   );
 
-  // 5. 读取输出并生成 Blob
+  // 读取输出并生成 Blob
   const data = ffmpeg.FS('readFile', outputName);
   const blob = new Blob([data.buffer], { type: file.type });
-  // 把文件名也附加到 Blob 以便下载用
   blob.name = outputName;
 
   return {
     blob,
     origSize: file.size,
-    newSize: blob.size,
-    outputName
+    newSize: blob.size
   };
 }
 
-// 获取小写后缀
+// 10. 辅助：提取文件扩展名
 function getExt(filename) {
   return filename.split('.').pop().toLowerCase();
 }
