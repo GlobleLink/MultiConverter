@@ -16,7 +16,7 @@
   <!-- 本页专属样式 -->
   <link rel="stylesheet" href="video-compression.css" />
 
-  <!-- 让整个拖拽区可点击 -->
+  <!-- Inline CSS: ensure the drop-area’s input covers the whole box -->
   <style>
     .drop-area { position: relative; }
     .drop-area input[type="file"] {
@@ -29,7 +29,6 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header class="header">
     <h1>Smart File Tools</h1>
     <p class="subtitle">
@@ -37,7 +36,6 @@
     </p>
   </header>
 
-  <!-- 二级导航 -->
   <nav class="sub-nav">
     <a href="../index.html">← Back to Home</a>
     <a href="../image-compression/index.html">Image Compression</a>
@@ -46,7 +44,6 @@
     <a href="../audio-compression/index.html">Audio Compression</a>
   </nav>
 
-  <!-- Main Content -->
   <main class="container">
     <h2>Video Compression</h2>
     <p class="upload-info">
@@ -85,16 +82,162 @@
     <div id="output" class="output"></div>
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
     <p>&copy; 2025 Smart File Tools</p>
   </footer>
 
-  <!-- 库依赖 -->
+  <!-- 1) FFmpeg core (must load before we call createFFmpeg) -->
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
+  <!-- 2) JSZip & FileSaver for ZIP downloads -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <!-- 本页脚本 -->
-  <script src="video-compression.js"></script>
+
+  <!-- 3) Inline “always-show file names” logic + deferred compression logic -->
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const fileInput   = document.getElementById('fileInput');
+    const dropArea    = document.getElementById('dropArea');
+    const fileList    = document.getElementById('fileList');
+    const compressBtn = document.getElementById('compressBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn    = document.getElementById('resetBtn');
+    const progress    = document.getElementById('progress');
+    const output      = document.getElementById('output');
+
+    let selectedFiles = [], resultBlobs = [];
+
+    // --- STEP A: File-picker UI (always show name) --- //
+    function renderFileList() {
+      fileList.innerHTML = '';
+      selectedFiles.forEach((f,i) => {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerHTML = `
+          <svg viewBox="0 0 24 24">
+            <path fill="none" stroke="var(--color-primary)" stroke-width="2"
+                  d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
+          </svg>
+          <span>${f.name}</span>
+          <button class="remove-btn" data-i="${i}">×</button>
+        `;
+        fileList.appendChild(div);
+      });
+      fileList.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.onclick = e => {
+          selectedFiles.splice(+e.currentTarget.dataset.i,1);
+          renderFileList();
+        };
+      });
+    }
+
+    function handleFiles(files) {
+      Array.from(files).forEach(f => {
+        if (selectedFiles.length < 3 && !selectedFiles.find(x=>x.name===f.name)) {
+          selectedFiles.push(f);
+        }
+      });
+      renderFileList();
+    }
+
+    ['dragenter','dragover','dragleave','drop'].forEach(evt => {
+      dropArea.addEventListener(evt, e => {
+        e.preventDefault(); e.stopPropagation();
+        dropArea.classList.toggle('dragover', evt==='dragover');
+      });
+    });
+    dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+    dropArea.addEventListener('click',  ()=> fileInput.click());
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+    resetBtn.onclick = () => {
+      selectedFiles = []; resultBlobs = [];
+      fileList.innerHTML = ''; output.innerHTML = '';
+      progress.textContent = 'Waiting for upload…';
+      downloadBtn.style.display = 'none'; downloadBtn.disabled = true;
+    };
+
+    // --- STEP B: Compression setup --- //
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({
+      log: true,
+      corePath: 'https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg-core.js'
+    });
+
+    compressBtn.onclick = async () => {
+      if (!selectedFiles.length) return alert('Select at least one video 😊');
+      compressBtn.disabled = resetBtn.disabled = true;
+      progress.textContent = 'Loading FFmpeg…';
+      await ffmpeg.load();
+
+      const crf = document.querySelector('input[name="quality"]:checked').value;
+      resultBlobs = [];
+
+      for (let i=0; i<selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        progress.textContent = `Compressing ${i+1}/${selectedFiles.length}: ${file.name}`;
+        const { blob, origSize, newSize } = await compressOne(file, crf);
+        resultBlobs.push({ blob, name: blob.name, origSize, newSize });
+      }
+
+      // render results
+      progress.textContent = 'Done! Pick your download:';
+      const ul = document.createElement('ul');
+      resultBlobs.forEach(r=>{
+        const li = document.createElement('li');
+        li.innerHTML = `
+          ${r.name}: ${(r.origSize/1024/1024).toFixed(2)}MB →
+          ${(r.newSize/1024/1024).toFixed(2)}MB
+          <a href="#" data-name="${r.name}" class="single-download">Download</a>
+        `;
+        ul.appendChild(li);
+      });
+      output.appendChild(ul);
+
+      // bind single-file downloads
+      output.querySelectorAll('.single-download').forEach(a=>{
+        a.onclick = e=>{
+          e.preventDefault();
+          const info = resultBlobs.find(x=>x.name===e.currentTarget.dataset.name);
+          const url  = URL.createObjectURL(info.blob);
+          const link = document.createElement('a');
+          link.href = url; link.download = info.name;
+          document.body.appendChild(link); link.click();
+          link.remove(); URL.revokeObjectURL(url);
+        };
+      });
+
+      // show ZIP button
+      downloadBtn.style.display = 'inline-block';
+      downloadBtn.onclick = async ()=>{
+        const zip = new JSZip();
+        resultBlobs.forEach(r=> zip.file(r.name, r.blob));
+        progress.textContent = 'Creating ZIP…';
+        const z = await zip.generateAsync({ type:'blob' });
+        saveAs(z,'videos-compressed.zip');
+      };
+
+      compressBtn.disabled = resetBtn.disabled = false;
+    };
+
+    // single file compress
+    async function compressOne(file, crf) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      const base = file.name.replace(/\.[^/.]+$/,'');
+      const out  = `${base}-compressed.${ext}`;
+
+      ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+
+      let vcodec = 'libx264';
+      if (ext === 'webm') vcodec = 'libvpx-vp9';
+
+      await ffmpeg.run('-i', file.name, '-c:v', vcodec, '-crf', crf, out);
+      const data = ffmpeg.FS('readFile', out);
+      const blob = new Blob([data.buffer], { type: file.type });
+      blob.name  = out;
+
+      return { blob, origSize: file.size, newSize: blob.size };
+    }
+  });
+  </script>
 </body>
 </html>
