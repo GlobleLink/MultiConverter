@@ -1,11 +1,34 @@
+/* ========== Color Variables ========== */
+:root {
+  /* 页面主背景色 */
+  --bg-color: #0a192f;
+  /* 卡片 / 面板 背景 */
+  --card-bg: #0e1b44;
+  /* 主文字色 */
+  --text-color: #e6f2fb;
+  /* 次级文字色 */
+  --subtext-color: #c9d1d9;
+  /* 主要强调色（按钮、图标等） */
+  --primary-color: #00d1ff;
+  /* 次要强调色（重置按钮等） */
+  --accent-color: #ff4c4c;
+  /* 边框 / 分隔线 */
+  --border-color: #2b3245;
+  /* 页脚文字色 */
+  --footer-text: #6c7685;
+}
+
 /* ========== Reset & Base ========== */
 * {
-  margin: 0; padding: 0; box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 body {
-  background: #0a192f; /* 深蓝科技感 */
-  color: #e6f2fb;
-  /* … */
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
 }
 
 /* ========== Homepage Header ========== */
@@ -15,11 +38,11 @@ body {
 }
 .home-header h1 {
   font-size: 2.5rem;
-  color: #00d1ff;
+  color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 .home-header p {
-  color: #c9d1d9;
+  color: var(--subtext-color);
   font-size: 1rem;
 }
 
@@ -30,7 +53,7 @@ body {
   padding: 0 1rem;
 }
 .tool-section h2 {
-  color: #e6f2fb;
+  color: var(--text-color);
   font-size: 1.5rem;
   margin-bottom: 1rem;
 }
@@ -42,7 +65,7 @@ body {
   gap: 1.5rem;
 }
 .tool-card {
-  background: #0e1b44; /* 卡片更亮一点 */
+  background-color: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
@@ -53,11 +76,11 @@ body {
 }
 .tool-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0 12px rgba(0,209,255,0.6), 0 8px 20px rgba(0,209,255,0.2);
+  box-shadow: 0 0 12px rgba(0, 209, 255, 0.6), 0 8px 20px rgba(0, 209, 255, 0.2);
 }
 .tool-card:focus {
   outline: none;
-  box-shadow: 0 0 16px rgba(0,209,255,0.8), inset 0 0 8px rgba(0,209,255,0.4);
+  box-shadow: 0 0 16px rgba(0, 209, 255, 0.8), inset 0 0 8px rgba(0, 209, 255, 0.4);
 }
 .tool-card .icon {
   width: 48px;
@@ -70,7 +93,7 @@ body {
   height: 100%;
 }
 .tool-card h3 {
-  color: #e6f2fb;
+  color: var(--text-color);
   font-size: 1rem;
   margin-top: 0.5rem;
 }
@@ -79,6 +102,6 @@ body {
 footer {
   text-align: center;
   padding: 1rem;
-  color: #6c7685;
+  color: var(--footer-text);
   font-size: 0.9rem;
 }
