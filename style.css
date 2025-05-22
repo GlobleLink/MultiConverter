@@ -1,207 +1,107 @@
+/* ========== Color Variables ========== */
 :root {
-  --color-bg-start: #0f2027;
-  --color-bg-mid:   #203a43;
-  --color-bg-end:   #2c5364;
-  --color-primary:  #58d3f7;
-  --color-primary-rgb: 88,211,247;
-  --color-text:     #e6f2fb;
-  --color-subtle:   #c9d1d9;
-  --color-link:     #6c7685;
-  --color-border:   #2b3245;
-  --color-error:    #ff4c4c;
+  /* 页面主背景色 */
+  --bg-color: #0a192f;
+  /* 卡片 / 面板 背景 */
+  --card-bg: #0e1b44;
+  /* 主文字色 */
+  --text-color: #e6f2fb;
+  /* 次级文字色 */
+  --subtext-color: #c9d1d9;
+  /* 主要强调色（按钮、图标等） */
+  --primary-color: #00d1ff;
+  /* 次要强调色（重置按钮等） */
+  --accent-color: #ff4c4c;
+  /* 边框 / 分隔线 */
+  --border-color: #2b3245;
+  /* 页脚文字色 */
+  --footer-text: #6c7685;
 }
 
-/* 全局基础 */
-body {
-  background: linear-gradient(
-    135deg,
-    var(--color-bg-start),
-    var(--color-bg-mid),
-    var(--color-bg-end)
-  );
-  color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.6;
-  letter-spacing: 0.5px;
+/* ========== Reset & Base ========== */
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
 }
 
-/* 头部 */
-.header {
+/* ========== Homepage Header ========== */
+.home-header {
   text-align: center;
-  padding: 2rem 1rem 1rem;
+  padding: 2rem 1rem;
 }
-.header h1 {
+.home-header h1 {
   font-size: 2.5rem;
-  margin: 0;
-  color: var(--color-primary);
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
 }
-.subtitle {
-  margin: 0.5rem 0 1.5rem;
-  color: var(--color-subtle);
-}
-
-/* 二级导航 */
-.sub-nav {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-.sub-nav a {
-  color: var(--color-link);
-  text-decoration: none;
-  margin: 0 0.75rem;
-  font-weight: 500;
-}
-.sub-nav a:hover,
-.sub-nav a.active {
-  color: var(--color-primary);
+.home-header p {
+  color: var(--subtext-color);
+  font-size: 1rem;
 }
 
-/* 主体容器 */
-.container {
-  max-width: 600px;
-  margin: 0 auto 3rem;
+/* ========== Tool Sections ========== */
+.tool-section {
+  max-width: 900px;
+  margin: 2rem auto;
   padding: 0 1rem;
+}
+.tool-section h2 {
+  color: var(--text-color);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ========== Tool Grid & Cards ========== */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+.tool-card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
   text-align: center;
-}
-
-/* 上传说明 */
-.upload-info {
-  color: var(--color-subtle);
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
-/* 拖拽区 */
-.drop-area {
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
-  border: 2px dashed var(--color-border);
-  border-radius: 8px;
-  padding: 2rem;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-bottom: 1.5rem;
+  overflow: hidden;
 }
-.drop-area:hover,
-.drop-area.dragover {
-  background: rgba(var(--color-primary-rgb), 0.1);
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 12px rgba(0, 209, 255, 0.6), 0 8px 20px rgba(0, 209, 255, 0.2);
 }
-.drop-area p {
-  margin: 0.5rem 0 0;
-  color: var(--color-link);
+.tool-card:focus {
+  outline: none;
+  box-shadow: 0 0 16px rgba(0, 209, 255, 0.8), inset 0 0 8px rgba(0, 209, 255, 0.4);
 }
-.drop-icon {
+.tool-card .icon {
   width: 48px;
   height: 48px;
-  margin: 0 auto 1rem;
-  display: block;
+  margin: 0 auto 0.75rem;
 }
-
-/* 隐藏实际文件输入 */
-.drop-area input[type="file"] {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  opacity: 0;
-  cursor: pointer;
+.tool-card .icon img,
+.tool-card .icon svg {
+  width: 100%;
+  height: 100%;
 }
-
-/* 文件列表 */
-.file-list {
-  text-align: left;
-  margin: 1rem 0;
-}
-.file-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
-  color: var(--color-subtle);
-}
-.file-item svg {
-  width: 24px;
-  height: 24px;
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-width: 2;
-}
-
-/* 质量选项 */
-.quality-options {
-  margin: 1.5rem 0;
-}
-.quality-options label {
-  margin: 0 1rem;
-  color: var(--color-subtle);
-  cursor: pointer;
-}
-.quality-options input {
-  margin-right: 0.3rem;
-}
-
-/* 按钮 */
-.btn {
-  border: none;
-  border-radius: 6px;
-  padding: 0.75rem 1.5rem;
+.tool-card h3 {
+  color: var(--text-color);
   font-size: 1rem;
-  cursor: pointer;
-  margin: 0 0.5rem;
-  transition: background 0.2s;
-}
-.btn-primary {
-  background: var(--color-primary);
-  color: var(--color-bg-start);
-}
-.btn-primary:hover {
-  background: #42a5c9;
-}
-.btn-secondary {
-  background: var(--color-error);
-  color: #fff;
-}
-.btn-secondary:hover {
-  background: #e63939;
+  margin-top: 0.5rem;
 }
 
-/* 进度 & 结果 */
-.progress {
-  color: var(--color-primary);
-  margin-top: 1rem;
-}
-.output {
-  margin-top: 1rem;
-  color: var(--color-text);
-  word-wrap: break-word;
-}
-
-/* 底部 */
-.footer {
+/* ========== Footer ========== */
+footer {
   text-align: center;
-  padding: 2rem 1rem 1rem;
-  color: var(--color-link);
+  padding: 1rem;
+  color: var(--footer-text);
   font-size: 0.9rem;
-}
-/* 已有样式保持不变，以下追加： */
-
-/* 删除按钮 */
-.file-item {
-  position: relative;
-  padding-right: 1.5rem;
-}
-.remove-btn {
-  position: absolute;
-  right: 0.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  color: var(--color-subtle);
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.remove-btn:hover {
-  color: var(--color-error);
 }
