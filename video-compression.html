@@ -7,7 +7,23 @@
   <link rel="stylesheet" href="../style.css" />
   <link rel="stylesheet" href="video-compression.css" />
 </head>
-<body>
+<script>
+  console.log('🚀 Inline script loaded');
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('compressBtn');
+    if (btn) {
+      console.log('🛠️ Found compressBtn');
+      btn.addEventListener('click', () => {
+        console.log('🛠️ Test: Compress button clicked');
+        alert('✅ Button click works!');
+      });
+    } else {
+      console.log('⚠️ compressBtn not found in DOM');
+    }
+  });
+</script>
+
+  <body>
   <header><h1>Test Header</h1></header>
   <main><p>If you see this, HTML is loading.</p></main>
   <footer><p>Test Footer</p></footer>
