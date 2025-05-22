@@ -24,11 +24,9 @@ fileInput.addEventListener('change', e => handleFiles(e.target.files));
 function handleFiles(files) {
   const arr   = Array.from(files);
   const space = 3 - selectedFiles.length;
-
   if (arr.length > space) {
     alert('Slow down, superstar! Only 3 images at once—drop a file before adding more ✨');
   }
-
   arr.slice(0, space).forEach(f => {
     if (!selectedFiles.includes(f)) selectedFiles.push(f);
   });
@@ -85,27 +83,50 @@ compressBtn.addEventListener('click', async () => {
   const zip = new JSZip();
   const results = [];
 
-  for (let i=0; i<selectedFiles.length; i++) {
+  for (let i = 0; i < selectedFiles.length; i++) {
     progress.textContent = `Compressing ${i+1}/${selectedFiles.length}…`;
     const { blob, name, origSize, newSize } = 
           await compressSingle(selectedFiles[i], quality);
     zip.file(name, blob);
-    results.push({ name, origSize, newSize });
+    results.push({ name, origSize, newSize, blob });
   }
 
-  progress.textContent = 'Ready to download ZIP';
+  // 准备 ZIP 下载
+  progress.textContent = 'ZIP ready to download';
   zipBlob = await zip.generateAsync({ type:'blob' });
   downloadZipBtn.style.display = 'inline-block';
   downloadZipBtn.disabled = false;
 
-  // 显示大小对比
+  // 显示每个文件的对比 + 单文件下载链接
   const ul = document.createElement('ul');
   results.forEach(r => {
     const li = document.createElement('li');
-    li.textContent = `${r.name}: ${formatBytes(r.origSize)} → ${formatBytes(r.newSize)}`;
+    li.innerHTML = `
+      ${r.name}: ${formatBytes(r.origSize)} → ${formatBytes(r.newSize)}
+      <a href="#" class="single-download" data-name="${r.name}">Download</a>
+    `;
     ul.appendChild(li);
   });
   output.appendChild(ul);
+
+  // 绑定每个单文件下载链接
+  document.querySelectorAll('.single-download').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const name = e.currentTarget.dataset.name;
+      const  res = results.find(r => r.name === name);
+      if (res) {
+        const url = URL.createObjectURL(res.blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    });
+  });
 
   compressBtn.disabled = resetBtn.disabled = false;
 });
@@ -148,6 +169,7 @@ function compressSingle(file, quality) {
     reader.readAsDataURL(file);
   });
 }
+
 function extMime(mime) {
   return mime === 'image/png' ? 'image/png' : 'image/jpeg';
 }
