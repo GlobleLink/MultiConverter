@@ -3,20 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Video Compression • Smart File Tools</title>
-  <meta
-    name="description"
-    content="Compress MP4, MOV, AVI, WMV, MKV, WebM online. Up to 3 videos per batch, same format output." 
-  />
+  <meta name="description"
+        content="Compress MP4, MOV, AVI, WMV, MKV, WebM online—keeps same format." />
+
   <!-- 公共样式 -->
   <link rel="stylesheet" href="../style.css" />
-  <!-- 本页专属样式 -->
+  <!-- 本页专属 -->
   <link rel="stylesheet" href="video-compression.css" />
+
+  <style>
+    /* 保证整个 drop-area 区都能点击 */
+    .drop-area { position: relative; }
+    .drop-area input[type=file] {
+      position: absolute; top:0; left:0;
+      width:100%; height:100%;
+      opacity:0; cursor:pointer;
+    }
+  </style>
 </head>
 <body>
   <header class="header">
     <h1>Smart File Tools</h1>
-    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
+    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents</p>
   </header>
 
   <nav class="sub-nav">
@@ -36,7 +46,6 @@
       <em>*Click or drag &amp; drop to select*</em>
     </p>
 
-    <!-- 拖拽并选文件区域 -->
     <div class="drop-area" id="dropArea">
       <svg class="drop-icon" viewBox="0 0 24 24">
         <path fill="none" stroke="var(--color-primary)" stroke-width="2"
@@ -46,8 +55,8 @@
       <input type="file" id="fileInput" accept="video/*" multiple />
     </div>
 
-    <!-- 立刻显示已选文件名 -->
-    <ul class="file-list" id="fileList"></ul>
+    <!-- 上传后立刻显示文件名 -->
+    <ul id="fileList" class="file-list"></ul>
 
     <div class="quality-options">
       <label><input type="radio" name="quality" value="23" /> Low</label>
@@ -75,6 +84,7 @@
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
   <!-- 本页脚本 -->
   <script src="video-compression.js"></script>
 </body>
