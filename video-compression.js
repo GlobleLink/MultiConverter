@@ -1,37 +1,56 @@
-// video-compression.js
-
-// —— 1. 初始化 & 变量 —— //
+// —— 初始化 & DOM 引用 —— //
 const { createFFmpeg, fetchFile } = FFmpeg;
 const ffmpeg = createFFmpeg({
   log: true,
   corePath: 'https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg-core.js'
 });
 
-const MAX_FILES    = 3;
-const fileInput    = document.getElementById('fileInput');
-const dropArea     = document.getElementById('dropArea');
-const fileListEl   = document.getElementById('fileList');
-const compressBtn  = document.getElementById('compressBtn');
-const downloadBtn  = document.getElementById('downloadBtn');
-const resetBtn     = document.getElementById('resetBtn');
-const progressEl   = document.getElementById('progress');
-const outputEl     = document.getElementById('output');
+const fileInput   = document.getElementById('fileInput');
+const dropArea    = document.getElementById('dropArea');
+const fileListEl  = document.getElementById('fileList');
+const compressBtn = document.getElementById('compressBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const resetBtn    = document.getElementById('resetBtn');
+const progressEl  = document.getElementById('progress');
+const outputEl    = document.getElementById('output');
 
+const MAX_FILES = 3;
 let selectedFiles = [];
 let resultBlobs   = [];
 
-// —— 2. 选文件 & 渲染列表 —— //
+// —— 文件选择 & 列表更新 —— //
+dropArea.addEventListener('click', () => fileInput.click());
+['dragenter','dragover','dragleave','drop'].forEach(evt => {
+  dropArea.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation();
+    dropArea.classList.toggle('dragover', evt === 'dragover');
+  });
+});
+dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  Array.from(files).some(f => {
+    if (selectedFiles.length >= MAX_FILES) {
+      alert('Slow down, superstar! Only 3 videos at once—drop a file before adding more ✨');
+      return true; // break
+    }
+    if (!selectedFiles.find(x => x.name === f.name)) {
+      selectedFiles.push(f);
+    }
+  });
+  renderFileList();
+}
+
 function renderFileList() {
   fileListEl.innerHTML = '';
-  selectedFiles.forEach((file, i) => {
+  selectedFiles.forEach((f, i) => {
     const div = document.createElement('div');
     div.className = 'file-item';
     div.innerHTML = `
-      <svg viewBox="0 0 24 24" class="file-icon">
-        <path fill="none" stroke="var(--color-primary)" stroke-width="2"
-          d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
-      </svg>
-      <span class="file-name">${file.name}</span>
+      <svg viewBox="0 0 24 24"><path fill="none" stroke="var(--color-primary)" stroke-width="2"
+        d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/></svg>
+      <span class="file-name">${f.name}</span>
       <button class="remove-btn" data-i="${i}">×</button>
     `;
     fileListEl.appendChild(div);
@@ -44,35 +63,9 @@ function renderFileList() {
   });
 }
 
-function handleFiles(files) {
-  const arr = Array.from(files);
-  const space = MAX_FILES - selectedFiles.length;
-  if (arr.length > space) {
-    alert('Slow down, superstar! Only 3 videos at once—drop a file before adding more ✨');
-  }
-  arr.slice(0, space).forEach(f => {
-    if (!selectedFiles.find(x => x.name === f.name)) {
-      selectedFiles.push(f);
-    }
-  });
-  renderFileList();
-}
-
-// 点/拖事件
-dropArea.addEventListener('click', () => fileInput.click());
-['dragenter','dragover','dragleave','drop'].forEach(evt => {
-  dropArea.addEventListener(evt, e => {
-    e.preventDefault(); e.stopPropagation();
-    dropArea.classList.toggle('dragover', evt === 'dragover');
-  });
-});
-dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-// Reset
+// —— Reset 按钮 —— //
 resetBtn.onclick = () => {
-  selectedFiles = [];
-  resultBlobs   = [];
+  selectedFiles = []; resultBlobs = [];
   fileListEl.innerHTML = '';
   outputEl.innerHTML   = '';
   progressEl.textContent = 'Waiting for upload…';
@@ -80,14 +73,13 @@ resetBtn.onclick = () => {
   downloadBtn.disabled     = true;
 };
 
-// —— 3. 压缩逻辑 —— //
+// —— 压缩按钮 —— //
 compressBtn.onclick = async () => {
   if (!selectedFiles.length) return alert('Please select at least one video 😊');
 
   compressBtn.disabled = resetBtn.disabled = true;
   outputEl.innerHTML   = '';
-  progressEl.textContent = 'Loading FFmpeg…';
-
+  progressEl.textContent = 'Loading FFmpeg core…';
   await ffmpeg.load();
 
   const crf = document.querySelector('input[name="quality"]:checked').value;
@@ -100,8 +92,7 @@ compressBtn.onclick = async () => {
     resultBlobs.push({ blob, name: blob.name, origSize, newSize });
   }
 
-  // 显示结果
-  progressEl.textContent = 'Compression complete! Choose download option.';
+  progressEl.textContent = 'Compression complete! Choose download:';
   const ul = document.createElement('ul');
   resultBlobs.forEach(r => {
     const li = document.createElement('li');
@@ -121,8 +112,8 @@ compressBtn.onclick = async () => {
       const info = resultBlobs.find(x => x.name === e.currentTarget.dataset.name);
       const url  = URL.createObjectURL(info.blob);
       const link = document.createElement('a');
-      link.href     = url;
-      link.download = info.name;
+      link.href    = url;
+      link.download= info.name;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -136,15 +127,15 @@ compressBtn.onclick = async () => {
   downloadBtn.onclick = async () => {
     const zip = new JSZip();
     resultBlobs.forEach(r => zip.file(r.name, r.blob));
-    progressEl.textContent = 'Packaging ZIP…';
-    const blob = await zip.generateAsync({ type: 'blob' });
-    saveAs(blob, 'videos-compressed.zip');
+    progressEl.textContent = 'Creating ZIP…';
+    const z = await zip.generateAsync({ type: 'blob' });
+    saveAs(z, 'videos-compressed.zip');
   };
 
   compressBtn.disabled = resetBtn.disabled = false;
 };
 
-// —— 4. 单文件压缩函数 —— //
+// —— 单文件压缩 —— //
 async function compressOne(file, crf) {
   const ext  = file.name.split('.').pop().toLowerCase();
   const base = file.name.replace(/\.[^/.]+$/, '');
@@ -159,7 +150,7 @@ async function compressOne(file, crf) {
 
   const data = ffmpeg.FS('readFile', out);
   const blob = new Blob([data.buffer], { type: file.type });
-  blob.name = out;
+  blob.name  = out;
 
   return { blob, origSize: file.size, newSize: blob.size };
 }

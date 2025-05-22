@@ -6,49 +6,49 @@
 
   <title>Online Video Compression • Smart File Tools</title>
   <meta name="description"
-        content="Compress MP4, MOV, AVI, WMV, MKV, WebM videos online and keep the same format. No software required." />
+        content="Compress any video online for free. Supports MP4, MOV, AVI, WMV, MKV, WebM—keeps same format." />
 
-  <!-- 全局样式 -->
   <link rel="stylesheet" href="../style.css" />
-  <!-- 本页专属样式 -->
   <link rel="stylesheet" href="video-compression.css" />
 
   <style>
-    /* 保证 .drop-area 任意区域都可点击文件 */
-    .drop-area { position: relative; }
-    .drop-area input[type="file"] {
-      position: absolute; top:0; left:0;
-      width:100%; height:100%;
-      opacity:0; cursor:pointer;
+    /* 确保拖拽区点击即可选文件 */
+    .drop-area { position:relative; }
+    .drop-area input[type=file] {
+      position:absolute; top:0; left:0;
+      width:100%; height:100%; opacity:0;
+      cursor:pointer;
     }
-    /* 文件列表样式 */
-    .file-list { margin: 1rem 0; }
-    .file-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .file-item .file-icon {
-      width: 1.2rem; height: 1.2rem;
-      margin-right: 0.5rem;
-    }
-    .file-item .file-name {
-      flex: 1;
+    /* 文件列表基本样式 */
+    .file-list {
+      margin:1rem 0;
       color: var(--color-text);
     }
-    .file-item .remove-btn {
-      background: none;
-      border: none;
-      color: var(--color-primary);
-      font-size: 1.2rem;
-      cursor: pointer;
+    .file-list .file-item {
+      display:flex;
+      align-items:center;
+      margin-bottom:0.5rem;
+    }
+    .file-list .file-item svg {
+      width:1.2rem; height:1.2rem;
+      margin-right:0.5rem;
+    }
+    .file-list .remove-btn {
+      margin-left:auto;
+      background:transparent;
+      border:none;
+      color:var(--color-secondary);
+      font-size:1.2rem;
+      cursor:pointer;
     }
   </style>
 </head>
 <body>
   <header class="header">
     <h1>Smart File Tools</h1>
-    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
+    <p class="subtitle">
+      Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly
+    </p>
   </header>
 
   <nav class="sub-nav">
@@ -62,28 +62,29 @@
   <main class="container">
     <h2>Video Compression</h2>
     <p class="upload-info">
-      Upload up to <strong>3 videos</strong> per batch.<br>
-      Supported: MP4, MOV, AVI, WMV, MKV, WebM.<br>
-      Compressed files keep the <strong>same format</strong>.<br>
+      Upload up to <strong>3 videos</strong> per batch.<br />
+      Supported formats: MP4, MOV, AVI, WMV, MKV, WebM.<br />
+      Compressed files keep the <strong>same format</strong>.<br />
       <em>*Click or drag &amp; drop to select*</em>
     </p>
 
+    <!-- 拖拽 / 点击上传区 -->
     <div class="drop-area" id="dropArea">
       <svg class="drop-icon" viewBox="0 0 24 24">
         <path fill="none" stroke="var(--color-primary)" stroke-width="2"
-          d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
+              d="M4 4h16v16H4zM16 8l-6 4 6 4V8z" />
       </svg>
       <p>Click or drop videos here</p>
       <input type="file" id="fileInput" accept="video/*" multiple />
     </div>
 
-    <!-- 这里显示已选文件名 -->
+    <!-- 上传后文件列表 -->
     <div class="file-list" id="fileList"></div>
 
     <div class="quality-options">
-      <label><input type="radio" name="quality" value="23"> Low</label>
-      <label><input type="radio" name="quality" value="28" checked> Medium</label>
-      <label><input type="radio" name="quality" value="35"> High</label>
+      <label><input type="radio" name="quality" value="23" /> Low</label>
+      <label><input type="radio" name="quality" value="28" checked /> Medium</label>
+      <label><input type="radio" name="quality" value="35" /> High</label>
     </div>
 
     <div class="actions">
@@ -102,11 +103,11 @@
     <p>&copy; 2025 Smart File Tools</p>
   </footer>
 
-  <!-- 库依赖 -->
+  <!-- 依赖库 -->
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <!-- 本页脚本 -->
+  <!-- 功能脚本 -->
   <script src="video-compression.js"></script>
 </body>
 </html>
