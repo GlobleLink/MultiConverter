@@ -2,83 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>Online Video Compression • Smart File Tools</title>
-  <meta name="description"
-        content="Compress any video online for free. Supports MP4, MOV, AVI, WMV, MKV, WebM—keeps same format." />
-
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="stylesheet" href="video-compression.css" />
-
-  <style>
-    .drop-area { position: relative; }
-    .drop-area input[type="file"] {
-      position: absolute; top:0; left:0;
-      width:100%; height:100%;
-      opacity:0; cursor:pointer;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart File Tools</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="header">
+  <!-- Header -->
+  <header class="home-header">
     <h1>Smart File Tools</h1>
-    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
+    <p>Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
   </header>
 
-  <nav class="sub-nav">
-    <a href="../index.html">← Back to Home</a>
-    <a href="../image-compression/index.html">Image Compression</a>
-    <a href="index.html" class="active">Video Compression</a>
-    <a href="../pdf-compression/index.html">PDF Compression</a>
-    <a href="../audio-compression/index.html">Audio Compression</a>
-  </nav>
+  <!-- File Compression Section -->
+  <section class="tool-section">
+    <h2>File Compression</h2>
+    <div class="tool-grid">
+      <a class="tool-card" href="image-compression.html">
+        <div class="icon">
+          <!-- Image SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2" 
+                  stroke="#58d3f7" stroke-width="2"/>
+            <circle cx="8" cy="8" r="1.5" fill="#58d3f7"/>
+            <path d="M3 21L8.5 13L13.5 17.5L21 9V21H3Z" fill="#58d3f7"/>
+          </svg>
+        </div>
+        <h3>Image Compression</h3>
+      </a>
 
-  <main class="container">
-    <h2>Video Compression</h2>
-    <p class="upload-info">
-      Upload up to <strong>3 videos</strong> per batch.<br />
-      MP4, MOV, AVI, WMV, MKV, WebM.<br />
-      Compressed files keep the same format.<br />
-      <em>*Click or drag &amp; drop to select*</em>
-    </p>
+      <a class="tool-card" href="video-compression.html">
+        <div class="icon">
+          <!-- Video SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="16" height="16" rx="2" 
+                  stroke="#58d3f7" stroke-width="2"/>
+            <polygon points="10,8 16,12 10,16" fill="#58d3f7"/>
+          </svg>
+        </div>
+        <h3>Video Compression</h3>
+      </a>
 
-    <div class="drop-area" id="dropArea">
-      <svg class="drop-icon" viewBox="0 0 24 24">
-        <path fill="none" stroke="var(--color-primary)" stroke-width="2"
-              d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
-      </svg>
-      <p>Click or drop videos here</p>
-      <input type="file" id="fileInput" accept="video/*" multiple />
+      <a class="tool-card" href="pdf-compression.html">
+        <div class="icon">
+          <!-- PDF SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 2H14L20 8V22H6V2Z" stroke="#58d3f7" stroke-width="2"/>
+            <path d="M14 2V8H20" stroke="#58d3f7" stroke-width="2"/>
+            <line x1="8" y1="12" x2="16" y2="12" stroke="#58d3f7" stroke-width="2"/>
+            <line x1="8" y1="16" x2="16" y2="16" stroke="#58d3f7" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>PDF Compression</h3>
+      </a>
+
+      <a class="tool-card" href="audio-compression.html">
+        <div class="icon">
+          <!-- Audio SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 9V15C9 18 12 20 12 20C12 20 15 18 15 15V9C15 6 12 4 12 4C12 4 9 6 9 9Z" 
+                  stroke="#58d3f7" stroke-width="2"/>
+            <line x1="3" y1="9" x2="3" y2="15" stroke="#58d3f7" stroke-width="2"/>
+            <line x1="21" y1="9" x2="21" y2="15" stroke="#58d3f7" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>Audio Compression</h3>
+      </a>
     </div>
+  </section>
 
-    <div class="file-list" id="fileList"></div>
+  <!-- Format Conversion Section -->
+  <section class="tool-section">
+    <h2>Format Conversion</h2>
+    <div class="tool-grid">
+      <a class="tool-card" href="image-conversion.html">
+        <div class="icon">
+          <!-- reuse Image SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="#58d3f7" stroke-width="2"/>
+            <circle cx="8" cy="8" r="1.5" fill="#58d3f7"/>
+            <path d="M3 21L8.5 13L13.5 17.5L21 9V21H3Z" fill="#58d3f7"/>
+          </svg>
+        </div>
+        <h3>Image Conversion</h3>
+      </a>
 
-    <div class="quality-options">
-      <label><input type="radio" name="quality" value="23" /> Low</label>
-      <label><input type="radio" name="quality" value="28" checked /> Medium</label>
-      <label><input type="radio" name="quality" value="35" /> High</label>
+      <a class="tool-card" href="video-conversion.html">
+        <div class="icon">
+          <!-- reuse Video SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="4" width="16" height="16" rx="2" stroke="#58d3f7" stroke-width="2"/>
+            <polygon points="10,8 16,12 10,16" fill="#58d3f7"/>
+          </svg>
+        </div>
+        <h3>Video Conversion</h3>
+      </a>
+
+      <a class="tool-card" href="audio-conversion.html">
+        <div class="icon">
+          <!-- Music SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 17V5l12-2v12" stroke="#58d3f7" stroke-width="2"/>
+            <circle cx="6" cy="17" r="3" stroke="#58d3f7" stroke-width="2"/>
+            <circle cx="18" cy="15" r="3" stroke="#58d3f7" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>Audio Conversion</h3>
+      </a>
+
+      <a class="tool-card" href="document-conversion.html">
+        <div class="icon">
+          <!-- File+ SVG -->
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" 
+               xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 2H14L20 8V22H6V2Z" stroke="#58d3f7" stroke-width="2"/>
+            <path d="M14 2V8H20" stroke="#58d3f7" stroke-width="2"/>
+            <line x1="12" y1="12" x2="12" y2="18" stroke="#58d3f7" stroke-width="2"/>
+            <line x1="9" y1="15" x2="15" y2="15" stroke="#58d3f7" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>Document Conversion</h3>
+      </a>
     </div>
+  </section>
 
-    <div class="actions">
-      <button id="compressBtn" class="btn btn-primary">Compress Videos</button>
-      <button id="downloadBtn" class="btn btn-primary" style="display:none" disabled>
-        Download ZIP
-      </button>
-      <button id="resetBtn" class="btn btn-secondary">Reset</button>
-    </div>
-
-    <div id="progress" class="progress">Waiting for upload…</div>
-    <div id="output" class="output"></div>
-  </main>
-
-  <footer class="footer">
+  <footer>
     <p>&copy; 2025 Smart File Tools</p>
   </footer>
-
-  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="video-compression.js"></script>
 </body>
 </html>
