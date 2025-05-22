@@ -12,129 +12,85 @@
 }
 
 body {
+  margin:0; padding:0;
   background: linear-gradient(135deg, var(--color-bg-start), var(--color-bg-mid), var(--color-bg-end));
   color: var(--color-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  margin: 0; padding: 0;
-  line-height: 1.6; letter-spacing: .5px;
+  line-height:1.6; letter-spacing:0.5px;
 }
 
-.header {
-  text-align: center; padding: 2rem 1rem 1rem;
-}
-.header h1 { color: var(--color-primary); font-size: 2.5rem; margin: 0; }
-.subtitle { color: var(--color-subtle); margin: .5rem 0 1.5rem; }
+.header { text-align:center; padding:2rem 1rem 1rem; }
+.header h1 { margin:0; font-size:2.5rem; color:var(--color-primary); }
+.subtitle { margin:.5rem 0 1.5rem; color:var(--color-subtle); }
 
-.sub-nav {
-  text-align: center; margin-bottom: 2rem;
-}
-.sub-nav a {
-  color: var(--color-link); text-decoration: none; margin: 0 .75rem; font-weight: 500;
-}
-.sub-nav a:hover, .sub-nav a.active { color: var(--color-primary); }
+.sub-nav { text-align:center; margin-bottom:2rem; }
+.sub-nav a { margin:0 .75rem; color:var(--color-link); text-decoration:none; font-weight:500; }
+.sub-nav a.active,
+.sub-nav a:hover { color:var(--color-primary); }
 
-.container {
-  max-width: 600px; margin: 0 auto 3rem; padding: 0 1rem; text-align: center;
-}
+.container { max-width:600px; margin:0 auto 3rem; padding:0 1rem; text-align:center; }
 
-.upload-info {
-  color: var(--color-subtle); font-size: .95rem; margin-bottom: 1.5rem;
-}
+.upload-info { color:var(--color-subtle); font-size:.95rem; margin-bottom:1.5rem; }
 
+/* 拖拽区 */
 .drop-area {
-  position: relative;
-  border: 2px dashed var(--color-border);
-  border-radius: 8px;
-  padding: 2rem;
-  cursor: pointer;
-  margin-bottom: 1.5rem;
-  transition: background .2s;
+  position:relative;
+  border:2px dashed var(--color-border);
+  border-radius:8px;
+  padding:2rem;
+  cursor:pointer;
+  transition:background .2s;
+  margin-bottom:1.5rem;
 }
-.drop-area:hover, .drop-area.dragover {
-  background: rgba(var(--color-primary-rgb), .1);
-}
-.drop-area p { margin: .5rem 0 0; color: var(--color-link); }
-.drop-icon {
-  width: 48px; height: 48px; margin: 0 auto 1rem; display: block;
-}
+.drop-area.dragover,
+.drop-area:hover { background:rgba(var(--color-primary-rgb), .1); }
+.drop-area p { margin:.5rem 0 0; color:var(--color-link); }
+.drop-icon { width:48px; height:48px; margin:0 auto 1rem; display:block; }
 
+/* 点击任何区域都触发文件选择 */
 .drop-area input[type="file"] {
-  position: absolute; top: 0; left: 0; width:100%; height:100%; opacity:0; cursor:pointer;
+  position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;
 }
 
-.file-list {
-  text-align: left; margin: 1rem 0;
-}
+.file-list { text-align:left; margin:1rem 0; }
 .file-item {
-  display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; color: var(--color-subtle);
-  position: relative; padding-right: 1.5rem;
+  display:flex; align-items:center; gap:.5rem; margin-bottom:.4rem;
+  color:var(--color-subtle);
+  position:relative; padding-right:1.5rem;
 }
 .file-item svg {
-  width: 24px; height: 24px; fill: none; stroke: var(--color-primary); stroke-width: 2;
+  width:24px; height:24px; fill:none; stroke:var(--color-primary); stroke-width:2;
 }
-
 .remove-btn {
-  position: absolute; right: .25rem; top: 50%; transform: translateY(-50%);
-  background: transparent; border: none; color: var(--color-subtle);
-  font-size: 1.2rem; cursor: pointer; transition: color .2s;
+  position:absolute; right:.25rem; top:50%; transform:translateY(-50%);
+  background:transparent; border:none; color:var(--color-subtle);
+  font-size:1.2rem; cursor:pointer; transition:color .2s;
 }
-.remove-btn:hover { color: var(--color-error); }
+.remove-btn:hover { color:var(--color-error); }
 
-.quality-options {
-  margin: 1.5rem 0;
-}
-.quality-options label {
-  margin: 0 1rem; color: var(--color-subtle); cursor: pointer;
-}
-.quality-options input { margin-right: .3rem; }
+.quality-options { margin:1.5rem 0; }
+.quality-options label { margin:0 1rem; color:var(--color-subtle); cursor:pointer; }
+.quality-options input { margin-right:.3rem; }
 
 .actions {
-  margin-bottom: 1rem;
+  margin-bottom:1rem;
 }
 .btn {
-  border: none; border-radius: 6px; padding: .75rem 1.5rem;
-  font-size: 1rem; cursor: pointer; margin: 0 .5rem; transition: background .2s;
+  border:none; border-radius:6px; padding:.75rem 1.5rem; font-size:1rem;
+  cursor:pointer; margin:0 .5rem; transition:background .2s;
 }
 .btn-primary {
-  background: var(--color-primary); color: var(--color-bg-start);
+  background:var(--color-primary); color:var(--color-bg-start);
 }
-.btn-primary:hover { background: #42a5c9; }
+.btn-primary:hover { background:#42a5c9; }
 .btn-secondary {
-  background: var(--color-error); color: #fff;
+  background:var(--color-error); color:#fff;
 }
-.btn-secondary:hover { background: #e63939; }
+.btn-secondary:hover { background:#e63939; }
 
-.progress {
-  color: var(--color-primary); margin-top: 1rem;
-}
-.output {
-  margin-top: 1rem; color: var(--color-text); word-wrap: break-word;
-}
-
-/* 单文件下载按钮 */
-.single-download {
-  display: inline-block; margin-left: .5rem;
-  padding: .25rem .5rem; background: var(--color-primary);
-  color: var(--color-bg-start); font-size: .9rem;
-  border-radius: 4px; text-decoration: none; transition: background .2s;
-}
-.single-download:hover {
-  background: #42a5c9;
-}
+.progress { color:var(--color-primary); margin-top:1rem; }
+.output { margin-top:1rem; color:var(--color-text); word-wrap:break-word; }
 
 .footer {
-  text-align: center; padding: 2rem 1rem 1rem; color: var(--color-link); font-size: .9rem;
-}
-/* 让整个拖拽区都能触发文件选择 */
-.drop-area {
-  position: relative;
-}
-
-/* 完全覆盖 .drop-area，让点击 anywhere 都能点到 input */
-.drop-area input[type="file"] {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  opacity: 0;
-  cursor: pointer;
+  text-align:center; padding:2rem 1rem 1rem; color:var(--color-link); font-size:.9rem;
 }
