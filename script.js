@@ -4,36 +4,34 @@ const compressBtn = document.getElementById('compressBtn');
 const resetBtn = document.getElementById('resetBtn');
 const progress = document.getElementById('progress');
 const output = document.getElementById('output');
+const dropArea = document.getElementById('dropArea');
 
 let selectedFiles = [];
 
-// 监听文件选择／拖拽
-fileInput.addEventListener('change', handleFiles);
-['dragenter','dragover','dragleave','drop'].forEach(eventName => {
-  document.getElementById('dropArea').addEventListener(eventName, preventDefaults, false);
+// 拖拽 & 选择 监听
+['dragenter','dragover','dragleave','drop'].forEach(evt =>
+  dropArea.addEventListener(evt, e => {
+    e.preventDefault(); e.stopPropagation();
+    dropArea.classList.toggle('dragover', evt==='dragover');
+  })
+);
+dropArea.addEventListener('drop', e => {
+  handleFiles(e.dataTransfer.files);
 });
-document.getElementById('dropArea').addEventListener('drop', (e) => {
-  const dt = e.dataTransfer;
-  handleFiles({ target: { files: dt.files } });
+fileInput.addEventListener('change', e => {
+  handleFiles(e.target.files);
 });
 
-function preventDefaults(e) {
-  e.preventDefault();
-  e.stopPropagation();
-}
-
-// 处理选中文件
-function handleFiles(e) {
-  const files = Array.from(e.target.files);
-  files.forEach(file => {
-    if (selectedFiles.length < 3) {
-      selectedFiles.push(file);
+function handleFiles(files) {
+  Array.from(files).forEach(f => {
+    if (selectedFiles.length < 3 && !selectedFiles.includes(f)) {
+      selectedFiles.push(f);
     }
   });
   updateFileList();
 }
 
-// 更新文件列表显示
+// 列表渲染
 function updateFileList() {
   fileListContainer.innerHTML = '';
   selectedFiles.forEach(file => {
@@ -47,7 +45,7 @@ function updateFileList() {
   });
 }
 
-// 重置
+// Reset
 resetBtn.addEventListener('click', () => {
   selectedFiles = [];
   updateFileList();
@@ -55,13 +53,59 @@ resetBtn.addEventListener('click', () => {
   output.innerHTML = '';
 });
 
-// TODO: 在这里接入你的压缩逻辑，使用 selectedFiles 数组
-compressBtn.addEventListener('click', () => {
+// compress 单个文件（返回 Promise<{blob, name}>）
+function compressImageFile(file, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(blob => {
+          if (!blob) return reject('Compression failed');
+          const ext = file.type === 'image/png' ? 'png' : 'jpg';
+          const name = file.name.replace(/\.[^/.]+$/, '') + '-compressed.' + ext;
+          resolve({ blob, name });
+        }, extMime(file.type), quality);
+      };
+      img.src = ev.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+function extMime(mime) {
+  return mime === 'image/png' ? 'image/png' : 'image/jpeg';
+}
+
+// 点击压缩 -> 逐个压缩 -> 打包 ZIP -> 下载
+compressBtn.addEventListener('click', async () => {
   if (!selectedFiles.length) {
     alert('Please select at least one image.');
     return;
   }
-  // 示例：仅演示进度反馈
-  progress.textContent = `Ready to compress ${selectedFiles.length} file(s)…`;
-  // 你的压缩实现…
+  compressBtn.disabled = resetBtn.disabled = true;
+  progress.textContent = `Compressing 1/${selectedFiles.length}…`;
+  const quality = parseFloat(document.querySelector('input[name="quality"]:checked').value);
+  const zip = new JSZip();
+
+  for (let i = 0; i < selectedFiles.length; i++) {
+    progress.textContent = `Compressing ${i+1}/${selectedFiles.length}…`;
+    try {
+      const { blob, name } = await compressImageFile(selectedFiles[i], quality);
+      zip.file(name, blob);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  progress.textContent = 'Generating ZIP…';
+  const content = await zip.generateAsync({ type: 'blob' });
+  saveAs(content, 'images-compressed.zip');
+  progress.textContent = 'Done!';
+  compressBtn.disabled = resetBtn.disabled = false;
 });
