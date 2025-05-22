@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>Online Video Compression • Smart File Tools</title>
-  <meta name="description"
-        content="Compress any video online for free. Supports MP4, MOV, AVI, WMV, MKV, WebM—keeps same format." />
+  <meta
+    name="description"
+    content="Compress any video online for free. Supports MP4, MOV, AVI, WMV, MKV, WebM—keeps same format. No software required."
+  />
 
+  <!-- 公共样式 -->
   <link rel="stylesheet" href="../style.css" />
+  <!-- 本页专属样式 -->
   <link rel="stylesheet" href="video-compression.css" />
 
   <style>
+    /* 覆盖 .drop-area，让整个区域都可点击选文件 */
     .drop-area { position: relative; }
     .drop-area input[type="file"] {
       position: absolute; top:0; left:0;
@@ -21,11 +26,15 @@
   </style>
 </head>
 <body>
+  <!-- Header -->
   <header class="header">
     <h1>Smart File Tools</h1>
-    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
+    <p class="subtitle">
+      Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly
+    </p>
   </header>
 
+  <!-- Sub-navigation -->
   <nav class="sub-nav">
     <a href="../index.html">← Back to Home</a>
     <a href="../image-compression/index.html">Image Compression</a>
@@ -34,15 +43,17 @@
     <a href="../audio-compression/index.html">Audio Compression</a>
   </nav>
 
+  <!-- Main content -->
   <main class="container">
     <h2>Video Compression</h2>
     <p class="upload-info">
       Upload up to <strong>3 videos</strong> per batch.<br />
-      MP4, MOV, AVI, WMV, MKV, WebM.<br />
-      Compressed files keep the same format.<br />
+      Supported formats: MP4, MOV, AVI, WMV, MKV, WebM.<br />
+      Compressed files keep the <strong>same format</strong>.<br />
       <em>*Click or drag &amp; drop to select*</em>
     </p>
 
+    <!-- 拖拽 / 点击区 -->
     <div class="drop-area" id="dropArea">
       <svg class="drop-icon" viewBox="0 0 24 24">
         <path fill="none" stroke="var(--color-primary)" stroke-width="2"
@@ -52,14 +63,17 @@
       <input type="file" id="fileInput" accept="video/*" multiple />
     </div>
 
+    <!-- 文件列表展示 -->
     <div class="file-list" id="fileList"></div>
 
+    <!-- 画质选项 -->
     <div class="quality-options">
       <label><input type="radio" name="quality" value="23" /> Low</label>
       <label><input type="radio" name="quality" value="28" checked /> Medium</label>
       <label><input type="radio" name="quality" value="35" /> High</label>
     </div>
 
+    <!-- 操作按钮 -->
     <div class="actions">
       <button id="compressBtn" class="btn btn-primary">Compress Videos</button>
       <button id="downloadBtn" class="btn btn-primary" style="display:none" disabled>
@@ -68,17 +82,21 @@
       <button id="resetBtn" class="btn btn-secondary">Reset</button>
     </div>
 
+    <!-- 进度 & 输出 -->
     <div id="progress" class="progress">Waiting for upload…</div>
     <div id="output" class="output"></div>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
     <p>&copy; 2025 Smart File Tools</p>
   </footer>
 
+  <!-- 依赖库 -->
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- 本页脚本 -->
   <script src="video-compression.js"></script>
 </body>
 </html>
