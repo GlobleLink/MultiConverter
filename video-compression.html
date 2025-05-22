@@ -12,15 +12,13 @@
   />
 
   <!-- 全局样式 -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../style.css" />
   <!-- 本页专属样式 -->
   <link rel="stylesheet" href="video-compression.css" />
 
-  <!-- 覆盖 .drop-area，让点击任意区域都能触发文件选择 -->
+  <!-- 让整个拖拽区可点击 -->
   <style>
-    .drop-area {
-      position: relative;
-    }
+    .drop-area { position: relative; }
     .drop-area input[type="file"] {
       position: absolute;
       top: 0; left: 0;
@@ -48,26 +46,23 @@
     <a href="../audio-compression/index.html">Audio Compression</a>
   </nav>
 
-  <!-- Page Content -->
+  <!-- Main Content -->
   <main class="container">
     <h2>Video Compression</h2>
     <p class="upload-info">
-      Upload 1 video (MP4, MOV, AVI, WMV, MKV, WebM).<br/>
-      Compressed file keeps the <strong>same format</strong>.<br/>
+      Upload up to <strong>3 videos</strong> per batch.<br />
+      Supported formats: MP4, MOV, AVI, WMV, MKV, WebM.<br />
+      Compressed files keep the <strong>same format</strong>.<br />
       <em>*Click or drag &amp; drop to select*</em>
     </p>
 
     <div class="drop-area" id="dropArea">
       <svg class="drop-icon" viewBox="0 0 24 24">
-        <path
-          fill="none"
-          stroke="var(--color-primary)"
-          stroke-width="2"
-          d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"
-        />
+        <path fill="none" stroke="var(--color-primary)" stroke-width="2"
+              d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
       </svg>
-      <p>Click or drop video here</p>
-      <input type="file" id="fileInput" accept="video/*" />
+      <p>Click or drop videos here</p>
+      <input type="file" id="fileInput" accept="video/*" multiple />
     </div>
 
     <div class="file-list" id="fileList"></div>
@@ -79,9 +74,9 @@
     </div>
 
     <div class="actions">
-      <button id="compressBtn" class="btn btn-primary">Compress Video</button>
+      <button id="compressBtn" class="btn btn-primary">Compress Videos</button>
       <button id="downloadBtn" class="btn btn-primary" style="display:none" disabled>
-        Download Video
+        Download ZIP
       </button>
       <button id="resetBtn" class="btn btn-secondary">Reset</button>
     </div>
@@ -95,126 +90,11 @@
     <p>&copy; 2025 Smart File Tools</p>
   </footer>
 
-  <!-- FFmpeg.wasm -->
+  <!-- 库依赖 -->
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
-
-  <!-- Inline Script：先处理文件选取，再做压缩 -->
-  <script>
-    // —— 文件选取 & 显示 —— //
-    const fileInput  = document.getElementById('fileInput');
-    const dropArea   = document.getElementById('dropArea');
-    const fileList   = document.getElementById('fileList');
-    const compressBtn= document.getElementById('compressBtn');
-    const resetBtn   = document.getElementById('resetBtn');
-    const downloadBtn= document.getElementById('downloadBtn');
-    const progress   = document.getElementById('progress');
-    const output     = document.getElementById('output');
-
-    let selectedFile = null;
-    let resultBlob   = null;
-
-    // 点击 & 拖拽都能选文件
-    dropArea.addEventListener('click', () => fileInput.click());
-    ['dragenter','dragover','dragleave','drop'].forEach(evt => {
-      dropArea.addEventListener(evt, e => {
-        e.preventDefault(); e.stopPropagation();
-        if (evt === 'dragover') dropArea.classList.add('dragover');
-        if (evt === 'dragleave' || evt === 'drop') dropArea.classList.remove('dragover');
-      });
-    });
-    dropArea.addEventListener('drop', e => {
-      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-    });
-    fileInput.addEventListener('change', e => {
-      if (e.target.files.length) handleFile(e.target.files[0]);
-    });
-
-    function handleFile(file) {
-      selectedFile = file;
-      fileList.innerHTML = `
-        <div class="file-item">
-          <svg viewBox="0 0 24 24">
-            <path fill="none" stroke="var(--color-primary)" stroke-width="2"
-                  d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
-          </svg>
-          <span>${file.name}</span>
-          <button class="remove-btn" onclick="resetAll()">×</button>
-        </div>
-      `;
-    }
-
-    function resetAll() {
-      selectedFile = null;
-      resultBlob   = null;
-      fileList.innerHTML = '';
-      downloadBtn.style.display = 'none';
-      downloadBtn.disabled     = true;
-      progress.textContent     = 'Waiting for upload…';
-      output.innerHTML         = '';
-    }
-    resetBtn.addEventListener('click', resetAll);
-
-    // —— FFmpeg 压缩逻辑 —— //
-    const { createFFmpeg, fetchFile } = FFmpeg;
-    const ffmpeg = createFFmpeg({ log: true });
-
-    compressBtn.addEventListener('click', async () => {
-      if (!selectedFile) {
-        alert('Please select a video first 😊');
-        return;
-      }
-      compressBtn.disabled = resetBtn.disabled = true;
-      progress.textContent = 'Loading FFmpeg…';
-      await ffmpeg.load();
-
-      const qualityCRF = document.querySelector('input[name="quality"]:checked').value;
-      const ext  = selectedFile.name.split('.').pop().toLowerCase();
-      const base = selectedFile.name.replace(/\.[^/.]+$/, '');
-      const outputName = `${base}-compressed.${ext}`;
-
-      // 写文件到内存
-      ffmpeg.FS('writeFile', selectedFile.name, await fetchFile(selectedFile));
-
-      // 动态选编码器
-      let vcodec = 'libx264';
-      if (ext === 'webm') vcodec = 'libvpx-vp9';
-
-      // 执行转码
-      await ffmpeg.run(
-        '-i', selectedFile.name,
-        '-c:v', vcodec,
-        '-crf', qualityCRF,
-        outputName
-      );
-
-      // 读取结果
-      const data = ffmpeg.FS('readFile', outputName);
-      resultBlob = new Blob([data.buffer], { type: selectedFile.type });
-      resultBlob.name = outputName;
-
-      progress.textContent = 'Compression complete!';
-      downloadBtn.style.display = 'inline-block';
-      downloadBtn.disabled     = false;
-      output.innerHTML = `
-        <p>
-          Original: ${(selectedFile.size/1024/1024).toFixed(2)} MB
-          → Compressed: ${(resultBlob.size/1024/1024).toFixed(2)} MB
-        </p>
-      `;
-      compressBtn.disabled = resetBtn.disabled = false;
-    });
-
-    downloadBtn.addEventListener('click', () => {
-      if (!resultBlob) return;
-      const url = URL.createObjectURL(resultBlob);
-      const a   = document.createElement('a');
-      a.href    = url;
-      a.download= resultBlob.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- 本页脚本 -->
+  <script src="video-compression.js"></script>
 </body>
 </html>
