@@ -1,0 +1,247 @@
+/* ========== Color Variables ========== */
+:root {
+  /* 页面主背景色 */
+  --bg-color: #0a192f;
+  /* 卡片 / 面板 背景 */
+  --card-bg: #0e1b44;
+  /* 主文字色 */
+  --text-color: #e6f2fb;
+  /* 次级文字色 */
+  --subtext-color: #c9d1d9;
+  /* 主要强调色（按钮、图标等） */
+  --primary-color: #00d1ff;
+  /* 次要强调色（重置按钮等） */
+  --accent-color: #ff4c4c;
+  /* 边框 / 分隔线 */
+  --border-color: #2b3245;
+  /* 页脚文字色 */
+  --footer-text: #6c7685;
+}
+
+/* ========== Reset & Base ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* ========== Homepage Header ========== */
+.home-header {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+.home-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+.home-header p {
+  color: var(--subtext-color);
+  font-size: 1rem;
+}
+
+/* ========== Tool Sections (Homepage) ========== */
+.tool-section {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.tool-section h2 {
+  color: var(--text-color);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ========== Tool Grid & Cards (Homepage) ========== */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+.tool-card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 12px rgba(0, 209, 255, 0.6), 0 8px 20px rgba(0, 209, 255, 0.2);
+}
+.tool-card:focus {
+  outline: none;
+  box-shadow: 0 0 16px rgba(0, 209, 255, 0.8), inset 0 0 8px rgba(0, 209, 255, 0.4);
+}
+.tool-card .icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 0.75rem;
+}
+.tool-card .icon img,
+.tool-card .icon svg {
+  width: 100%;
+  height: 100%;
+}
+.tool-card h3 {
+  color: var(--text-color);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* ========== Subpage Navigation ========== */
+.sub-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--card-bg);
+}
+.sub-nav a {
+  color: var(--subtext-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.sub-nav a:hover {
+  color: var(--primary-color);
+}
+.sub-nav a.active {
+  color: #ffffff;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* ========== Subpage Main Wrapper ========== */
+.subpage {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* ========== Upload Info ========== */
+.upload-info {
+  color: var(--subtext-color);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.upload-info .highlight {
+  color: var(--primary-color);
+}
+
+/* ========== Drop Area ========== */
+.drop-area {
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  text-align: center;
+  padding: 2rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.drop-area:hover {
+  background: rgba(14, 27, 68, 0.5);
+}
+.drop-area p {
+  margin-top: 0.75rem;
+  color: var(--subtext-color);
+}
+
+/* Hide the native file input but keep it clickable */
+.drop-area input[type="file"] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ========== File Info ========== */
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+.file-info .file-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* ========== Quality Options ========== */
+.quality-options {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.quality-options label {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+.quality-options input[type="radio"] {
+  accent-color: var(--primary-color);
+  margin-right: 0.25rem;
+}
+
+/* ========== Action Buttons ========== */
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.action-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 6px;
+  color: #0a192f;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.action-btn:hover {
+  background-color: #39b9fc;
+}
+.zip-btn {
+  display: none; /* JS 里根据情况显示 */
+}
+.reset-btn {
+  background-color: var(--accent-color);
+  color: #ffffff;
+}
+
+/* ========== Progress & Results ========== */
+#progress {
+  color: var(--subtext-color);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+#output a {
+  display: block;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+}
+#output a:hover {
+  text-decoration: underline;
+}
+
+/* ========== Footer ========== */
+footer {
+  text-align: center;
+  padding: 1rem;
+  color: var(--footer-text);
+  font-size: 0.9rem;
+}
