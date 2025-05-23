@@ -1,168 +1,108 @@
-// ——— video-compression.js ———
-// 1. DOM ready
+console.log('📦 video-compression.js loaded');
+
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('📦 video-compression.js loaded');
-
-  // 2. 取元素
-  const fileInput   = document.getElementById('fileInput');
-  const dropArea    = document.getElementById('dropArea');
-  const fileListEl  = document.getElementById('fileList');
+  // 元素引用
+  const dropZone   = document.getElementById('dropZone');
+  const fileList   = document.getElementById('fileList');
   const compressBtn = document.getElementById('compressBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
   const resetBtn    = document.getElementById('resetBtn');
-  const progressEl  = document.getElementById('progress');
-  const outputEl    = document.getElementById('output');
+  const statusEl    = document.getElementById('status');
 
-  // 3. 变量
-  const MAX_FILES = 3;
-  let selectedFiles = [];
-  let resultBlobs   = [];
+  let files = [];
 
-  // 4. 渲染列表
-  function renderFileList() {
-    fileListEl.innerHTML = '';
-    selectedFiles.forEach((f, i) => {
-      const div = document.createElement('div');
-      div.className = 'file-item';
-      div.innerHTML = `
-        <svg viewBox="0 0 24 24" class="file-icon">
-          <path fill="none" stroke="var(--color-primary)" stroke-width="2"
-                d="M4 4h16v16H4zM16 8l-6 4 6 4V8z"/>
-        </svg>
-        <span class="file-name">${f.name}</span>
-        <button class="remove-btn" data-i="${i}">×</button>
-      `;
-      fileListEl.appendChild(div);
-    });
-    fileListEl.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.onclick = e => {
-        selectedFiles.splice(+e.currentTarget.dataset.i, 1);
-        renderFileList();
-      };
-    });
-  }
-
-  // 5. 处理新文件
-  function handleFiles(files) {
-    const incoming = Array.from(files);
-    const space    = MAX_FILES - selectedFiles.length;
-    if (incoming.length > space) {
-      alert('Slow down, superstar! Only 3 videos at once—drop a file before adding more ✨');
-    }
-    incoming.slice(0, space).forEach(f => {
-      if (!selectedFiles.find(x => x.name === f.name)) {
-        selectedFiles.push(f);
-      }
-    });
-    renderFileList();
-  }
-
-  // 6. 绑定拖拽 & 点击
-  ['dragenter','dragover','dragleave','drop'].forEach(evt => {
-    dropArea.addEventListener(evt, e => {
-      e.preventDefault(); e.stopPropagation();
-      dropArea.classList.toggle('dragover', evt === 'dragover');
-    });
+  // 拖放 & 选择文件处理
+  dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('hover');
   });
-  dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-  dropArea.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-  // 7. Reset
-  resetBtn.onclick = () => {
-    selectedFiles = [];
-    resultBlobs   = [];
-    fileListEl.innerHTML = '';
-    outputEl.innerHTML   = '';
-    progressEl.textContent = 'Waiting for upload…';
-    downloadBtn.style.display = 'none';
-    downloadBtn.disabled     = true;
-  };
-
-  // 8. 初始化 FFmpeg
-  const { createFFmpeg, fetchFile } = FFmpeg;
-  const ffmpeg = createFFmpeg({
-    log: true,
-    corePath: 'https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg-core.js'
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('hover');
+  });
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('hover');
+    handleFiles(e.dataTransfer.files);
+  });
+  dropZone.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'video/*';
+    input.multiple = true;
+    input.onchange = () => handleFiles(input.files);
+    input.click();
   });
 
-  // 9. 压缩按钮
+  // 重置
+  resetBtn.addEventListener('click', () => {
+    files = [];
+    fileList.innerHTML = '';
+    statusEl.textContent = 'Waiting for upload…';
+  });
+
+  // Compress 按钮
   compressBtn.addEventListener('click', async () => {
     console.log('🛠️ Compress button clicked');
-    if (selectedFiles.length === 0) {
-      return alert('Please select at least one video 😊');
-    }
+    if (files.length === 0) return alert('Please select at least one video.');
 
-    compressBtn.disabled = resetBtn.disabled = true;
-    outputEl.innerHTML   = '';
-    progressEl.textContent = 'Loading FFmpeg…';
+    compressBtn.disabled = true;
+    statusEl.textContent = 'Loading FFmpeg…';
+
+    // —— 关键：使用全大写 FFmpeg
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({
+      log: true,
+      corePath: 'https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg-core.js'
+    });
+
     await ffmpeg.load();
+    statusEl.textContent = 'Compressing…';
 
-    const crf = document.querySelector('input[name="quality"]:checked').value;
-    resultBlobs = [];
+    const zip = new JSZip();
 
-    for (let i = 0; i < selectedFiles.length; i++) {
-      const file = selectedFiles[i];
-      progressEl.textContent = `Compressing ${i+1}/${selectedFiles.length}: ${file.name}`;
-      const { blob, origSize, newSize } = await compressOne(file, crf);
-      resultBlobs.push({ blob, name: blob.name, origSize, newSize });
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const quality = document.querySelector('input[name="quality"]:checked').value;
+      const outName = file.name.replace(/\.(\w+)$/, `_compressed.$1`);
+
+      // 写入内存
+      ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+
+      // 调用 ffmpeg.run
+      const args = [
+        '-i', file.name,
+        '-vcodec', 'libx264',
+        ...(quality === 'low'   ? ['-crf', '30']
+           : quality === 'medium'? ['-crf', '23']
+           : ['-crf', '18']),
+        outName
+      ];
+      await ffmpeg.run(...args);
+
+      // 读取压缩结果
+      const data = ffmpeg.FS('readFile', outName);
+      zip.file(outName, data);
+
+      // 清理 FS
+      ffmpeg.FS('unlink', file.name);
+      ffmpeg.FS('unlink', outName);
     }
 
-    progressEl.textContent = 'Compression complete! Choose download:';
-    const ul = document.createElement('ul');
-    resultBlobs.forEach(r => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        ${r.name}: ${(r.origSize/1024/1024).toFixed(2)}MB →
-        ${(r.newSize/1024/1024).toFixed(2)}MB
-        <a href="#" class="single-download" data-name="${r.name}">Download</a>
-      `;
-      ul.appendChild(li);
-    });
-    outputEl.appendChild(ul);
+    statusEl.textContent = 'Packaging ZIP…';
+    const content = await zip.generateAsync({ type: 'blob' });
+    saveAs(content, 'compressed-videos.zip');
 
-    // 单文件下载
-    ul.querySelectorAll('.single-download').forEach(a => {
-      a.onclick = e => {
-        e.preventDefault();
-        const info = resultBlobs.find(x => x.name === e.currentTarget.dataset.name);
-        const url  = URL.createObjectURL(info.blob);
-        const link = document.createElement('a');
-        link.href = url; link.download = info.name;
-        document.body.appendChild(link); link.click();
-        link.remove(); URL.revokeObjectURL(url);
-      };
-    });
-
-    // 批量 ZIP
-    downloadBtn.style.display = 'inline-block';
-    downloadBtn.disabled     = false;
-    downloadBtn.onclick = async () => {
-      const zip = new JSZip();
-      resultBlobs.forEach(r => zip.file(r.name, r.blob));
-      progressEl.textContent = 'Creating ZIP…';
-      const blob = await zip.generateAsync({ type: 'blob' });
-      saveAs(blob, 'videos-compressed.zip');
-    };
-
-    compressBtn.disabled = resetBtn.disabled = false;
+    statusEl.textContent = 'Done!';
+    compressBtn.disabled = false;
   });
 
-  // 10. 真正压缩函数
-  async function compressOne(file, crf) {
-    const ext  = file.name.split('.').pop().toLowerCase();
-    const base = file.name.replace(/\.[^/.]+$/, '');
-    const out  = `${base}-compressed.${ext}`;
-
-    ffmpeg.FS('writeFile', file.name, await fetchFile(file));
-
-    let vcodec = 'libx264';
-    if (ext === 'webm') vcodec = 'libvpx-vp9';
-
-    await ffmpeg.run('-i', file.name, '-c:v', vcodec, '-crf', crf, out);
-    const data = ffmpeg.FS('readFile', out);
-    const blob = new Blob([data.buffer], { type: file.type });
-    blob.name = out;
-    return { blob, origSize: file.size, newSize: blob.size };
+  // 处理用户选择的文件
+  function handleFiles(selected) {
+    Array.from(selected).slice(0, 3).forEach(file => {
+      if (!file.type.startsWith('video/')) return;
+      files.push(file);
+      const li = document.createElement('li');
+      li.textContent = file.name;
+      fileList.appendChild(li);
+    });
   }
 });
