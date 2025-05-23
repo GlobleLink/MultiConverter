@@ -2,10 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Video Compression</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video Compression • Smart File Tools</title>
+  <meta
+    name="description"
+    content="Compress any video online for free. Supports MP4, MOV, AVI, WMV, MKV, WebM—keeps same format."
+  />
+
+  <!-- 全站公共样式 -->
+  <link rel="stylesheet" href="../style.css" />
+  <!-- 本页专属样式 -->
   <link rel="stylesheet" href="video-compression.css" />
 </head>
 <body>
@@ -24,13 +30,16 @@
   <main>
     <section class="tool-section">
       <h2>Video Compression</h2>
-      <p>Upload up to 3 videos per batch.<br />
-      Supported: MP4, MOV, AVI, WMV, MKV, WebM.<br />
-      Compressed files keep the <strong>same format</strong>.<br />
-      <em>*Click or drag & drop to select*</em></p>
+      <p>
+        Upload up to 3 videos per batch.<br />
+        Supported formats: MP4, MOV, AVI, WMV, MKV, WebM.<br />
+        Compressed files remain in the <strong>same format</strong>.<br />
+        <em>*Click or drag &amp; drop to select*</em>
+      </p>
 
       <div id="dropZone" class="drop-zone">
-        <span class="drop-icon">&larr;⟨</span>
+        <!-- 你可以用字体图标或图片替换下面的 ★ -->
+        <span class="drop-icon">🎞️</span>
         <p>Click or drop videos here</p>
       </div>
 
@@ -44,10 +53,10 @@
 
       <div class="buttons">
         <button id="compressBtn" class="btn compress">Compress Videos</button>
-        <button id="resetBtn" class="btn reset">Reset</button>
+        <button id="resetBtn"   class="btn reset">Reset</button>
       </div>
 
-      <p id="status">Waiting for upload…</p>
+      <p id="status" class="status">Waiting for upload…</p>
     </section>
   </main>
 
@@ -55,15 +64,12 @@
     <p>© 2025 Smart File Tools</p>
   </footer>
 
-  <!-- 第三方依赖：确保加 crossorigin，且在本页脚本之前 -->
-  <script 
-    src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js" 
-    crossorigin="anonymous"
-  ></script>
+  <!-- 依赖库：改用支持 CORS 的 jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-  <!-- 本页核心脚本 -->
+  <!-- 本页脚本 -->
   <script src="video-compression.js"></script>
 </body>
 </html>
