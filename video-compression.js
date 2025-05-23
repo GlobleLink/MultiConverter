@@ -1,5 +1,18 @@
 console.log('📦 video-compression.js loaded');
 
+// 动态加载 FFmpeg 脚本，避免 CORS 或顺序问题
+async function loadFFmpegScript() {
+  if (window.FFmpeg) return;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.8/dist/ffmpeg.min.js';
+    s.async = true;
+    s.onload  = () => { console.log('🚀 FFmpeg script loaded'); resolve(); };
+    s.onerror = () => reject(new Error('Failed to load FFmpeg script'));
+    document.head.appendChild(s);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const dropZone    = document.getElementById('dropZone');
   const fileList    = document.getElementById('fileList');
@@ -9,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let files = [];
 
-  // 拖放高亮
+  // 拖放与点击选文件
   dropZone.addEventListener('dragover', e => {
     e.preventDefault();
     dropZone.classList.add('hover');
@@ -17,25 +30,21 @@ document.addEventListener('DOMContentLoaded', () => {
   dropZone.addEventListener('dragleave', () => {
     dropZone.classList.remove('hover');
   });
-
-  // 放下文件
   dropZone.addEventListener('drop', e => {
     e.preventDefault();
     dropZone.classList.remove('hover');
     handleFiles(e.dataTransfer.files);
   });
-
-  // 点击打开文件对话框
   dropZone.addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'video/*';
-    input.multiple = true;
-    input.onchange = () => handleFiles(input.files);
-    input.click();
+    const inp = document.createElement('input');
+    inp.type     = 'file';
+    inp.accept   = 'video/*';
+    inp.multiple = true;
+    inp.onchange = () => handleFiles(inp.files);
+    inp.click();
   });
 
-  // 重置
+  // Reset
   resetBtn.addEventListener('click', () => {
     files = [];
     fileList.innerHTML = '';
@@ -43,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     compressBtn.disabled = false;
   });
 
-  // 压缩主流程
+  // Compress 主流程
   compressBtn.addEventListener('click', async () => {
     console.log('🛠️ Compress button clicked');
     if (files.length === 0) {
@@ -54,7 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
     statusEl.textContent = 'Loading FFmpeg…';
 
     try {
-      // —— 关键：正确引用全大写 FFmpeg，全新 CORS 友好 CDN 路径
+      // 动态加载并确认全局 FFmpeg 已就绪
+      await loadFFmpegScript();
+
+      // 从全局拿出 createFFmpeg、fetchFile
       const { createFFmpeg, fetchFile } = FFmpeg;
       const ffmpeg = createFFmpeg({
         log: true,
@@ -64,17 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
       await ffmpeg.load();
       statusEl.textContent = 'Compressing…';
 
-      const zip = new JSZip();
+      const zip     = new JSZip();
       const quality = document.querySelector('input[name="quality"]:checked').value;
 
-      // 遍历每个文件
       for (let file of files) {
-        const ext    = file.name.split('.').pop();
-        const base   = file.name.replace(/\.[^/.]+$/, '');
+        const ext     = file.name.split('.').pop();
+        const base    = file.name.replace(/\.[^/.]+$/, '');
         const outName = `${base}-compressed.${ext}`;
 
+        // 写入虚拟文件系统
         ffmpeg.FS('writeFile', file.name, await fetchFile(file));
 
+        // 选择编码器与 CRF
         const crf    = quality === 'low' ? 30
                       : quality === 'medium' ? 23
                       : 18;
@@ -82,9 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await ffmpeg.run('-i', file.name, '-c:v', vcodec, '-crf', crf, outName);
 
+        // 读出并打包 ZIP
         const data = ffmpeg.FS('readFile', outName);
         zip.file(outName, data);
 
+        // 清理
         ffmpeg.FS('unlink', file.name);
         ffmpeg.FS('unlink', outName);
       }
@@ -103,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 追加并渲染新文件
+  // 将文件加入列表并展示
   function handleFiles(selected) {
     Array.from(selected)
       .slice(0, 3 - files.length)
