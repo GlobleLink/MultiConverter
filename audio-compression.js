@@ -13,15 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let files = [];
 
-  // 特性检测
   const supportMR = typeof MediaRecorder !== 'undefined';
   const supportCS = HTMLAudioElement.prototype.captureStream !== undefined;
   if (!supportMR || !supportCS) {
     warnEl.style.display = 'block';
     compressBtn.disabled = true;
+    return;
   }
 
-  // 拖拽 & 点击
   ['dragover','dragleave','drop'].forEach(ev => {
     dropArea.addEventListener(ev, e => {
       e.preventDefault();
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
   dropArea.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', () => handleFiles(fileInput.files));
 
-  // 添加文件
   function handleFiles(list) {
     for (let file of list) {
       if (!file.type.startsWith('audio/')) continue;
@@ -45,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFileList();
   }
 
-  // 渲染列表
   function renderFileList() {
     fileListEl.innerHTML = '';
     files.forEach((obj, idx) => {
@@ -63,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 重置
   resetBtn.addEventListener('click', () => {
     files = [];
     renderFileList();
@@ -74,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     compressBtn.disabled = false;
   });
 
-  // 压缩主流程
   compressBtn.addEventListener('click', async () => {
     if (!files.length) {
       alert('Please select at least one audio file.');
@@ -94,18 +89,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const { file, originalSize } = obj;
       progressEl.textContent = `Compressing ${file.name}…`;
 
-      // 尝试本地压缩，否则退回原文件
       let blob;
       try {
         blob = await recordToWebMAudio(file, bitrateMap[quality]);
-      } catch (err) {
-        console.warn('Compression failed, using original file', err);
+      } catch (e) {
+        console.warn(e);
         blob = file;
       }
-
       const afterSize = blob.size;
 
-      // 显示对比
       const line = document.createElement('div');
       line.className = 'line';
       line.textContent = `${file.name}: ${(originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB`;
@@ -116,11 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
       line.appendChild(dl);
       outputEl.appendChild(line);
 
-      // 添加到 ZIP
       zip.file(file.name.replace(/\.[^/.]+$/, '_compressed.webm'), blob);
     }
 
-    // ZIP 下载
     progressEl.textContent = 'Packaging ZIP…';
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     downloadZipBtn.style.display = 'inline-block';
@@ -129,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
     progressEl.textContent = 'Done!';
   });
 
-  // 本地录制为 WebM Audio
   function recordToWebMAudio(file, audioBitsPerSecond) {
     return new Promise((resolve, reject) => {
       const audio = document.createElement('audio');
