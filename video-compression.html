@@ -12,7 +12,6 @@
     <h1>Smart File Tools</h1>
     <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
   </header>
-
   <nav class="sub-nav">
     <a href="index.html">← Back to Home</a>
     <a href="image-compression.html">Image Compression</a>
@@ -20,18 +19,17 @@
     <a href="pdf-compression.html">PDF Compression</a>
     <a href="audio-compression.html">Audio Compression</a>
   </nav>
-
   <main class="container">
     <h2>Video Compression</h2>
     <p class="upload-info">
-      Upload up to <strong>3 videos</strong> per batch.<br />
-      Supported: MP4, MOV, AVI, WMV, MKV, WebM.<br />
-      All output will be compressed to <strong>WebM</strong>.<br />
+      Upload up to <strong>3 videos</strong> per batch.<br/>
+      Supported: MP4, MOV, AVI, WMV, MKV, WebM.<br/>
+      All output will be compressed to <strong>WebM</strong>.<br/>
       <em>*Click or drag &amp; drop to select*</em>
     </p>
 
     <div id="compatibilityMessage" class="warning" style="display:none;">
-      ⚠️ Your browser/device doesn’t fully support video capture/compression.<br />
+      ⚠️ Your browser/device doesn’t fully support video capture/compression.<br/>
       Please upgrade your system or use a PC browser.
     </div>
 
@@ -51,14 +49,15 @@
 
     <div class="actions">
       <button id="compressBtn" class="btn btn-primary">Compress Videos</button>
-      <button id="downloadZipBtn" class="btn btn-primary" style="display:none;" disabled>Download ZIP</button>
-      <button id="resetBtn"    class="btn btn-secondary">Reset</button>
+      <button id="downloadZipBtn" class="btn btn-primary" disabled style="display:none;">
+        Download ZIP
+      </button>
+      <button id="resetBtn" class="btn btn-secondary">Reset</button>
     </div>
 
-    <div id="progress" class="progress">Waiting for upload…</div>
+    <p id="progress" class="progress">Waiting for upload…</p>
     <div id="output" class="output"></div>
   </main>
-
   <footer class="footer">
     <p>© 2025 Smart File Tools</p>
   </footer>
