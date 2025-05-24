@@ -1,120 +1,118 @@
-console.log('📦 WebM-only video-compression.js loaded');
+console.log('📦 image-compression.js loaded');
 
 document.addEventListener('DOMContentLoaded', () => {
-  const dropZone    = document.getElementById('dropZone');
-  const fileList    = document.getElementById('fileList');
-  const compressBtn = document.getElementById('compressBtn');
-  const resetBtn    = document.getElementById('resetBtn');
-  const statusEl    = document.getElementById('status');
-  const warnEl      = document.getElementById('compatibilityMessage');
+  const dropZone       = document.getElementById('dropZone');
+  const fileInput      = document.getElementById('fileInput');
+  const fileList       = document.getElementById('fileList');
+  const resultList     = document.getElementById('resultList');
+  const compressBtn    = document.getElementById('compressBtn');
+  const downloadZipBtn = document.getElementById('downloadZipBtn');
+  const resetBtn       = document.getElementById('resetBtn');
+  const statusEl       = document.getElementById('status');
+
   let files = [];
 
-  // 兼容性检测
-  const supportMR  = typeof MediaRecorder !== 'undefined';
-  const supportCS  = HTMLVideoElement.prototype.captureStream !== undefined;
-  if (!supportMR || !supportCS) {
-    warnEl.style.display = 'block';
-    compressBtn.disabled = true;
-    return;
-  }
+  // 打开文件选择
+  dropZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => handleFiles(fileInput.files));
 
-  // 拖拽 & 点击选文件
+  // 拖放
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('hover'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
   dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('hover'); handleFiles(e.dataTransfer.files); });
-  dropZone.addEventListener('click', () => {
-    const inp = document.createElement('input');
-    inp.type = 'file'; inp.accept = 'video/*'; inp.multiple = true;
-    inp.onchange = () => handleFiles(inp.files);
-    inp.click();
-  });
 
-  // Reset
-  resetBtn.addEventListener('click', () => {
-    files = [];
-    fileList.innerHTML = '';
-    statusEl.textContent = 'Waiting for upload…';
-    compressBtn.disabled = false;
-  });
-
-  // Compress 主流程
-  compressBtn.addEventListener('click', async () => {
-    if (files.length === 0) {
-      alert('Please select at least one video.');
-      return;
-    }
-    compressBtn.disabled = true;
-    statusEl.textContent = 'Starting compression…';
-
-    try {
-      const zip = new JSZip();
-      const quality = document.querySelector('input[name="quality"]:checked').value;
-      const bitrateMap = { low: 200_000, medium: 500_000, high: 1_000_000 };
-
-      for (let file of files) {
-        statusEl.textContent = `Compressing ${file.name}…`;
-        const blob = await recordToWebM(file, bitrateMap[quality]);
-        const base    = file.name.replace(/\.[^/.]+$/, '');
-        const outName = `${base}-compressed.webm`;
-        zip.file(outName, blob);
-      }
-
-      statusEl.textContent = 'Packaging ZIP…';
-      const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, 'compressed-videos-webm.zip');
-      statusEl.textContent = 'Done!';
-    } catch (err) {
-      console.error(err);
-      alert('Error: ' + err.message);
-      statusEl.textContent = 'Error occurred.';
-    } finally {
-      compressBtn.disabled = false;
-    }
-  });
-
-  // 处理文件列表
+  // 处理文件上限与列表
   function handleFiles(selected) {
-    Array.from(selected).slice(0, 3 - files.length).forEach(file => {
-      if (!file.type.startsWith('video/')) return;
-      files.push(file);
+    Array.from(selected).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      if (files.length >= 3) {
+        alert('Slow down, superstar! Only 3 images at once—drop a file before adding more ✨');
+        return;
+      }
+      files.push({ file, originalSize: file.size });
+      renderFileList();
+    });
+  }
+
+  function renderFileList() {
+    fileList.innerHTML = '';
+    files.forEach((obj, idx) => {
       const li = document.createElement('li');
-      li.textContent = file.name;
+      li.innerHTML = `
+        ${obj.file.name}
+        <button class="removeBtn">×</button>
+      `;
+      li.querySelector('.removeBtn').addEventListener('click', () => {
+        files.splice(idx, 1);
+        renderFileList();
+      });
       fileList.appendChild(li);
     });
   }
 
-  // MediaRecorder 重录到 WebM 的核心函数
-  async function recordToWebM(file, videoBitsPerSecond) {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      video.src = URL.createObjectURL(file);
-      video.muted = true;
-      video.playsInline = true;
-      video.style.display = 'none';
-      document.body.appendChild(video);
+  // 压缩主流程
+  compressBtn.addEventListener('click', async () => {
+    if (files.length === 0) { alert('Please select at least one image.'); return; }
+    compressBtn.disabled = true;
+    statusEl.textContent = 'Compressing...';
+    resultList.innerHTML = '';
 
-      video.onloadedmetadata = () => {
-        const stream = video.captureStream();
-        const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-          ? 'video/webm;codecs=vp9'
-          : 'video/webm;codecs=vp8';
-        const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond });
-        const chunks = [];
+    const zip = new JSZip();
+    const qualityMap = { low: 0.3, medium: 0.6, high: 0.9 };
+    const quality = document.querySelector('input[name="quality"]:checked').value;
 
-        recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-        recorder.onerror = e => reject(e.error || new Error('Recording failed'));
-        recorder.onstop = () => {
-          const blob = new Blob(chunks, { type: mime });
-          document.body.removeChild(video);
-          resolve(blob);
-        };
+    for (let obj of files) {
+      const { file, originalSize } = obj;
+      statusEl.textContent = `Compressing ${file.name}...`;
+      const blob = await compressImage(file, qualityMap[quality]);
+      zip.file(file.name.replace(/\.(\w+)$/, '_compressed.$1'), blob);
 
-        recorder.start();
-        video.play().catch(err => reject(err));
-        video.onended = () => recorder.stop();
+      // 显示结果对比
+      const li = document.createElement('li');
+      const afterSize = blob.size;
+      li.innerHTML = `
+        ${file.name}: ${(originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB
+        <button class="downloadBtn">Download</button>
+      `;
+      li.querySelector('.downloadBtn').addEventListener('click', () => saveAs(blob, file.name.replace(/\.(\w+)$/, '_compressed.$1')));
+      resultList.appendChild(li);
+    }
+
+    // ZIP 下载
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    downloadZipBtn.style.display = 'inline-block';
+    downloadZipBtn.onclick = () => saveAs(zipBlob, 'compressed-images.zip');
+
+    statusEl.textContent = 'Done!';
+    compressBtn.disabled = false;
+  });
+
+  // 图片压缩函数，基于 Canvas
+  function compressImage(file, quality) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(
+          blob => resolve(blob),
+          file.type,
+          quality
+        );
       };
-
-      video.onerror = () => reject(new Error('Failed to load video'));
+      img.src = URL.createObjectURL(file);
     });
   }
+
+  // 重置
+  resetBtn.addEventListener('click', () => {
+    files = [];
+    fileList.innerHTML = '';
+    resultList.innerHTML = '';
+    statusEl.textContent = 'Waiting for upload…';
+    downloadZipBtn.style.display = 'none';
+  });
 });
