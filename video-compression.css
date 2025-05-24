@@ -1,19 +1,99 @@
-/* 放在 video-compression.css 顶部，统一本页主题色管理 */
-:root {
-  --primary-color: #1a73e8;
-  --secondary-color: #ff7043;
-  --warning-color: #b00;
-}
+/* 参照全局变量，无需重复 :root 定义 */
 
-/* 示例引用： */
-body {
-  background-color: var(--primary-color);
+/* 段落、标题配色 */
+.container h2 {
+  color: var(--text-color);
 }
-
-.tool-section h2 {
-  color: var(--secondary-color);
+.upload-info {
+  color: var(--subtext-color);
 }
-
+/* 警告提示 */
 .warning {
-  color: var(--warning-color);
+  color: var(--accent-color);
+  margin: 1em 0;
+}
+/* 拖拽区域 */
+.drop-area {
+  border: 2px dashed var(--border-color);
+  background: var(--card-bg);
+  padding: 2em;
+  text-align: center;
+  cursor: pointer;
+}
+.drop-area.hover {
+  background: rgba(var(--text-color-rgb), 0.1);
+}
+.drop-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+/* 文件列表 */
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 1em 0;
+}
+.file-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card-bg);
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  color: var(--text-color);
+}
+.file-list li .remove-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+/* 质量选项 */
+.quality-options {
+  margin: 1em 0;
+  color: var(--text-color);
+}
+.quality-options label {
+  margin-right: 1em;
+}
+
+/* 按钮组 */
+.actions .btn {
+  padding: 0.6em 1.2em;
+  margin-right: 0.5em;
+}
+.btn-primary {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+}
+.btn-secondary {
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+}
+
+/* 进度 & 输出 */
+.progress {
+  margin: 1em 0;
+  color: var(--text-color);
+}
+.output {
+  margin: 1em 0;
+  color: var(--text-color);
+}
+.output .line {
+  margin-bottom: 0.5em;
+}
+.output .download-btn {
+  margin-left: 0.5em;
+  padding: 0.2em 0.6em;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  cursor: pointer;
 }

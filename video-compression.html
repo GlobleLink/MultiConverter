@@ -3,64 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Image Compression • Smart File Tools</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="image-compression.css" />
+  <title>Video Compression • Smart File Tools</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Compress any video to optimized WebM format instantly in your browser. Supports MP4, MOV, AVI, WMV, MKV, WebM." />
+  <meta name="keywords" content="video compression, WebM, browser compression, MediaRecorder" />
+  <link rel="canonical" href="https://yourdomain.com/video-compression.html" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Smart File Tools – Video Compression" />
+  <meta property="og:description" content="Compress any video to WebM format directly in your browser without uploads." />
+  <meta property="og:url" content="https://yourdomain.com/video-compression.html" />
+  <meta property="og:type" content="website" />
+
+  <!-- Theme color (for mobile UI) -->
+  <meta name="theme-color" content="#00d1ff" />
+
+  <!-- Global + Page CSS -->
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="video-compression.css" />
 </head>
 <body>
-  <header>
-    <h1 class="logo">Smart File Tools</h1>
-    <p class="subtitle">Compress & Convert Images, Videos, Audio & Documents Instantly</p>
-    <nav>
-      <a href="index.html">← Back to Home</a>
-      <a class="active" href="image-compression.html">Image Compression</a>
-      <a href="video-compression.html">Video Compression</a>
-      <a href="pdf-compression.html">PDF Compression</a>
-      <a href="audio-compression.html">Audio Compression</a>
-    </nav>
+  <header class="header">
+    <h1>Smart File Tools</h1>
+    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
   </header>
+  <nav class="sub-nav">
+    <a href="index.html">← Back to Home</a>
+    <a href="image-compression.html">Image Compression</a>
+    <a href="video-compression.html" class="active">Video Compression</a>
+    <a href="pdf-compression.html">PDF Compression</a>
+    <a href="audio-compression.html">Audio Compression</a>
+  </nav>
+  <main class="container">
+    <h2>Video Compression</h2>
+    <p class="upload-info">
+      Upload up to <strong>3 videos</strong> per batch.<br />
+      Supported: MP4, MOV, AVI, WMV, MKV, WebM.<br />
+      All output will be compressed to <strong>WebM</strong>.<br />
+      <em>*Click or drag &amp; drop to select*</em>
+    </p>
 
-  <main>
-    <section class="tool-section">
-      <h2>Image Compression</h2>
-      <p>
-        You can upload up to <strong>3 images</strong> per batch.<br />
-        Supported formats: JPG, JPEG, PNG, GIF, WEBP, BMP, HEIC, HEIF.<br />
-        Compressed files remain in the same format.<br />
-        *Click or drag & drop to select*
-      </p>
+    <div id="compatibilityMessage" class="warning" style="display:none;">
+      ⚠️ Your browser/device doesn’t fully support video capture/compression.<br />
+      Please upgrade your system or use a PC browser.
+    </div>
 
-      <div id="dropZone" class="drop-zone">
-        <span class="drop-icon">🖼️</span>
-        <p>Drag & drop images here, or click to select</p>
-      </div>
-      <input type="file" id="fileInput" accept="image/*" multiple hidden />
+    <div class="drop-area" id="dropArea">
+      <span class="drop-icon">🎞️</span>
+      <p>Drag &amp; drop videos here, or click to select</p>
+      <input type="file" id="fileInput" accept="video/*" multiple hidden />
+    </div>
 
-      <ul id="fileList" class="file-list"></ul>
-      
-      <div class="options">
-        <label><input type="radio" name="quality" value="low" /> Low</label>
-        <label><input type="radio" name="quality" value="medium" checked /> Medium</label>
-        <label><input type="radio" name="quality" value="high" /> High</label>
-      </div>
+    <div class="file-list" id="fileList"></div>
 
-      <div class="buttons">
-        <button id="compressBtn" class="btn compress">Compress Images</button>
-        <button id="downloadZipBtn" class="btn download" style="display:none;">Download ZIP</button>
-        <button id="resetBtn" class="btn reset">Reset</button>
-      </div>
+    <div class="quality-options">
+      <label><input type="radio" name="quality" value="low" /> Low</label>
+      <label><input type="radio" name="quality" value="medium" checked /> Medium</label>
+      <label><input type="radio" name="quality" value="high" /> High</label>
+    </div>
 
-      <p id="status" class="status">Waiting for upload…</p>
-      <ul id="resultList" class="result-list"></ul>
-    </section>
+    <div class="actions">
+      <button id="compressBtn" class="btn btn-primary">Compress Videos</button>
+      <button id="resetBtn"    class="btn btn-secondary">Reset</button>
+    </div>
+
+    <div id="progress" class="progress">Waiting for upload…</div>
+    <div class="output" id="output"></div>
   </main>
-
-  <footer>
+  <footer class="footer">
     <p>© 2025 Smart File Tools</p>
   </footer>
 
+  <!-- Dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="image-compression.js"></script>
+  <!-- Core Logic -->
+  <script src="video-compression.js"></script>
 </body>
 </html>
