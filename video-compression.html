@@ -4,22 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Video Compression • Smart File Tools</title>
-
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="Compress any video to optimized WebM format instantly in your browser. Supports MP4, MOV, AVI, WMV, MKV, WebM." />
-  <meta name="keywords" content="video compression, WebM, browser compression, MediaRecorder" />
-  <link rel="canonical" href="https://yourdomain.com/video-compression.html" />
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Smart File Tools – Video Compression" />
-  <meta property="og:description" content="Compress any video to WebM format directly in your browser without uploads." />
-  <meta property="og:url" content="https://yourdomain.com/video-compression.html" />
-  <meta property="og:type" content="website" />
-
-  <!-- Theme color (for mobile UI) -->
-  <meta name="theme-color" content="#00d1ff" />
-
-  <!-- Global + Page CSS -->
   <link rel="stylesheet" href="../style.css" />
   <link rel="stylesheet" href="video-compression.css" />
 </head>
@@ -28,13 +12,15 @@
     <h1>Smart File Tools</h1>
     <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
   </header>
+
   <nav class="sub-nav">
     <a href="index.html">← Back to Home</a>
     <a href="image-compression.html">Image Compression</a>
-    <a href="video-compression.html" class="active">Video Compression</a>
+    <a class="active" href="video-compression.html">Video Compression</a>
     <a href="pdf-compression.html">PDF Compression</a>
     <a href="audio-compression.html">Audio Compression</a>
   </nav>
+
   <main class="container">
     <h2>Video Compression</h2>
     <p class="upload-info">
@@ -55,7 +41,7 @@
       <input type="file" id="fileInput" accept="video/*" multiple hidden />
     </div>
 
-    <div class="file-list" id="fileList"></div>
+    <ul class="file-list" id="fileList"></ul>
 
     <div class="quality-options">
       <label><input type="radio" name="quality" value="low" /> Low</label>
@@ -65,12 +51,14 @@
 
     <div class="actions">
       <button id="compressBtn" class="btn btn-primary">Compress Videos</button>
+      <button id="downloadZipBtn" class="btn btn-primary" style="display:none;" disabled>Download ZIP</button>
       <button id="resetBtn"    class="btn btn-secondary">Reset</button>
     </div>
 
     <div id="progress" class="progress">Waiting for upload…</div>
-    <div class="output" id="output"></div>
+    <div id="output" class="output"></div>
   </main>
+
   <footer class="footer">
     <p>© 2025 Smart File Tools</p>
   </footer>

@@ -1,24 +1,40 @@
-/* 参照全局变量，无需重复 :root 定义 */
+/* 容器居中 */
+.container {
+  max-width: 800px;
+  margin: 2em auto;
+  text-align: center;
+}
 
-/* 段落、标题配色 */
-.container h2 {
+/* 标题与说明 */
+.header h1,
+.subtitle,
+.container h2,
+.upload-info,
+.progress,
+.output {
+  text-align: center;
   color: var(--text-color);
 }
 .upload-info {
   color: var(--subtext-color);
 }
+
 /* 警告提示 */
 .warning {
   color: var(--accent-color);
   margin: 1em 0;
 }
+
 /* 拖拽区域 */
 .drop-area {
   border: 2px dashed var(--border-color);
   background: var(--card-bg);
   padding: 2em;
-  text-align: center;
+  margin: 1em auto;
+  width: 80%;
+  max-width: 600px;
   cursor: pointer;
+  transition: background 0.2s;
 }
 .drop-area.hover {
   background: rgba(var(--text-color-rgb), 0.1);
@@ -37,34 +53,33 @@
 }
 .file-list li {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   background: var(--card-bg);
+  color: var(--text-color);
   padding: 0.5em;
   margin-bottom: 0.5em;
-  color: var(--text-color);
 }
 .file-list li .remove-btn {
   background: none;
   border: none;
-  color: var(--accent-color);
   font-size: 1.2em;
+  color: var(--accent-color);
   cursor: pointer;
 }
 
 /* 质量选项 */
 .quality-options {
   margin: 1em 0;
-  color: var(--text-color);
 }
 .quality-options label {
-  margin-right: 1em;
+  margin: 0 1em;
+  color: var(--text-color);
 }
 
-/* 按钮组 */
+/* 操作按钮 */
 .actions .btn {
-  padding: 0.6em 1.2em;
-  margin-right: 0.5em;
+  margin: 0.5em;
 }
 .btn-primary {
   background: var(--primary-color);
@@ -77,21 +92,17 @@
   border: none;
 }
 
-/* 进度 & 输出 */
-.progress {
-  margin: 1em 0;
-  color: var(--text-color);
-}
+/* 输出结果：单行 & 按钮 */
 .output {
   margin: 1em 0;
-  color: var(--text-color);
 }
 .output .line {
   margin-bottom: 0.5em;
+  color: var(--text-color);
 }
 .output .download-btn {
   margin-left: 0.5em;
-  padding: 0.2em 0.6em;
+  padding: 0.3em 0.6em;
   background: var(--primary-color);
   color: #fff;
   border: none;
