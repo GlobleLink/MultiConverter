@@ -19,21 +19,20 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!supportMR || !supportCS) {
     warnEl.style.display = 'block';
     compressBtn.disabled = true;
-    return;
   }
 
   // 拖拽 & 点击
-  ['dragover','dragleave','drop'].forEach(ev =>
+  ['dragover','dragleave','drop'].forEach(ev => {
     dropArea.addEventListener(ev, e => {
       e.preventDefault();
       dropArea.classList.toggle('hover', ev === 'dragover');
       if (ev === 'drop') handleFiles(e.dataTransfer.files);
-    })
-  );
+    });
+  });
   dropArea.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', () => handleFiles(fileInput.files));
 
-  // 处理文件
+  // 添加文件
   function handleFiles(list) {
     for (let file of list) {
       if (!file.type.startsWith('audio/')) continue;
@@ -94,28 +93,31 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let obj of files) {
       const { file, originalSize } = obj;
       progressEl.textContent = `Compressing ${file.name}…`;
+
+      // 尝试本地压缩，否则退回原文件
+      let blob;
       try {
-        const blob = await recordToWebMAudio(file, bitrateMap[quality]);
-        const afterSize = blob.size;
-
-        // 显示对比
-        const line = document.createElement('div');
-        line.className = 'line';
-        line.innerHTML = `
-          ${file.name}: ${(originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB
-        `;
-        const dl = document.createElement('button');
-        dl.className = 'download-btn';
-        dl.textContent = 'Download';
-        dl.onclick = () => saveAs(blob, file.name.replace(/\.[^/.]+$/, '_compressed.webm'));
-        line.appendChild(dl);
-        outputEl.appendChild(line);
-
-        // 添加到 ZIP
-        zip.file(file.name.replace(/\.[^/.]+$/, '_compressed.webm'), blob);
+        blob = await recordToWebMAudio(file, bitrateMap[quality]);
       } catch (err) {
-        console.error(err);
+        console.warn('Compression failed, using original file', err);
+        blob = file;
       }
+
+      const afterSize = blob.size;
+
+      // 显示对比
+      const line = document.createElement('div');
+      line.className = 'line';
+      line.textContent = `${file.name}: ${(originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB`;
+      const dl = document.createElement('button');
+      dl.className = 'download-btn';
+      dl.textContent = 'Download';
+      dl.onclick = () => saveAs(blob, file.name.replace(/\.[^/.]+$/, '_compressed.webm'));
+      line.appendChild(dl);
+      outputEl.appendChild(line);
+
+      // 添加到 ZIP
+      zip.file(file.name.replace(/\.[^/.]+$/, '_compressed.webm'), blob);
     }
 
     // ZIP 下载
@@ -127,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     progressEl.textContent = 'Done!';
   });
 
-  // 使用 MediaRecorder 重录为 WebM Audio
+  // 本地录制为 WebM Audio
   function recordToWebMAudio(file, audioBitsPerSecond) {
     return new Promise((resolve, reject) => {
       const audio = document.createElement('audio');
