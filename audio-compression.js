@@ -1,4 +1,4 @@
-console.log('📦 audio-compression.js loaded (Direct Package Only)');
+console.log('📦 audio-compression.js loaded (smart fallback)');
 
 document.addEventListener('DOMContentLoaded', () => {
   const dropArea = document.getElementById('dropArea');
@@ -60,22 +60,75 @@ document.addEventListener('DOMContentLoaded', () => {
     outputEl.innerHTML = '';
     progressEl.textContent = 'Processing…';
 
-    // 直接返回原文件
     const file = fileObj.file;
-    const afterSize = file.size;
+    let blob, isCompressed = false;
+    let errorMsg = '';
+
+    // 仅 webm/ogg 走 MediaRecorder 进行“压缩”，其它全部直接返回原文件
+    if (/\.(webm|ogg)$/i.test(file.name)) {
+      try {
+        const quality = document.querySelector('input[name="quality"]:checked').value;
+        const bitrateMap = { low: 32000, medium: 64000, high: 128000 };
+        blob = await recordToWebMAudio(file, bitrateMap[quality]);
+        isCompressed = true;
+      } catch (e) {
+        console.warn(e);
+        blob = file;
+        errorMsg = `<span style="color:orange;">Compression failed, original file provided.</span>`;
+      }
+    } else {
+      blob = file;
+      errorMsg = `<span style="color:orange;">This audio format cannot be compressed in browser, original file provided.</span>`;
+    }
+
+    const afterSize = blob.size;
     const div = document.createElement('div');
     div.className = 'line';
-    div.innerHTML = `${file.name}: ${(fileObj.originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB
-      <br><span style="color:orange;">No compression for this format. Original file is ready for download.</span>
-    `;
+    div.innerHTML = `${file.name}: ${(fileObj.originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB` +
+      (errorMsg ? `<br>${errorMsg}` : '');
     const dl = document.createElement('button');
     dl.className = 'download-btn';
     dl.textContent = 'Download';
-    dl.onclick = () => saveAs(file, file.name);
+    // 压缩/原样，下载均以 .webm 后缀（如果是压缩）或原后缀
+    dl.onclick = () => saveAs(blob, isCompressed 
+      ? file.name.replace(/\.[^/.]+$/, '_compressed.webm') 
+      : file.name);
     div.appendChild(dl);
     outputEl.appendChild(div);
 
     progressEl.textContent = 'Done!';
     compressBtn.disabled = false;
   };
+
+  // 仅 webm/ogg 可录制压缩
+  function recordToWebMAudio(file, audioBitsPerSecond) {
+    return new Promise((resolve, reject) => {
+      const audio = document.createElement('audio');
+      audio.src = URL.createObjectURL(file);
+      audio.muted = true;
+      audio.playsInline = true;
+      audio.style.display = 'none';
+      document.body.appendChild(audio);
+
+      audio.onloadedmetadata = () => {
+        const stream = audio.captureStream();
+        const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+          ? 'audio/webm;codecs=opus'
+          : 'audio/webm';
+        const recorder = new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond });
+        const chunks = [];
+        recorder.ondataavailable = e => e.data && chunks.push(e.data);
+        recorder.onerror = e => reject(e.error || new Error('Recording failed'));
+        recorder.onstop = () => {
+          const out = new Blob(chunks, { type: mime });
+          document.body.removeChild(audio);
+          resolve(out);
+        };
+        recorder.start();
+        audio.play().catch(err => reject(err));
+        audio.onended = () => recorder.stop();
+      };
+      audio.onerror = () => reject(new Error('Failed to load audio'));
+    });
+  }
 });
