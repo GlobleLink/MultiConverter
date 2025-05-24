@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let files = [];
 
+  // 特性检测
   const supportMR = typeof MediaRecorder !== 'undefined';
   const supportCS = HTMLAudioElement.prototype.captureStream !== undefined;
   if (!supportMR || !supportCS) {
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  // 拖拽 & 点击
   ['dragover','dragleave','drop'].forEach(ev => {
     dropArea.addEventListener(ev, e => {
       e.preventDefault();
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   dropArea.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', () => handleFiles(fileInput.files));
 
+  // 处理文件
   function handleFiles(list) {
     for (let file of list) {
       if (!file.type.startsWith('audio/')) continue;
@@ -43,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFileList();
   }
 
+  // 渲染文件列表
   function renderFileList() {
     fileListEl.innerHTML = '';
     files.forEach((obj, idx) => {
@@ -60,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 重置
   resetBtn.addEventListener('click', () => {
     files = [];
     renderFileList();
@@ -70,37 +75,43 @@ document.addEventListener('DOMContentLoaded', () => {
     compressBtn.disabled = false;
   });
 
+  // 压缩主流程
   compressBtn.addEventListener('click', async () => {
     if (!files.length) {
       alert('Please select at least one audio file.');
       return;
     }
-    compressBtn.disabled = true;
-    progressEl.textContent = 'Starting compression…';
-    outputEl.innerHTML = '';
+    compressBtn.disabled    = true;
+    outputEl.innerHTML       = '';
+    progressEl.textContent   = 'Starting compression…';
     downloadZipBtn.style.display = 'none';
-    downloadZipBtn.disabled = true;
+    downloadZipBtn.disabled  = true;
 
     const zip = new JSZip();
-    const quality = document.querySelector('input[name="quality"]:checked').value;
+    const quality   = document.querySelector('input[name="quality"]:checked').value;
     const bitrateMap = { low: 32000, medium: 64000, high: 128000 };
 
-    for (let obj of files) {
-      const { file, originalSize } = obj;
+    for (let i = 0; i < files.length; i++) {
+      const { file, originalSize } = files[i];
       progressEl.textContent = `Compressing ${file.name}…`;
 
+      // 尝试本地压缩，否则退回原文件
       let blob;
       try {
         blob = await recordToWebMAudio(file, bitrateMap[quality]);
       } catch (e) {
-        console.warn(e);
+        console.warn('recordToWebMAudio failed:', e);
         blob = file;
       }
+
       const afterSize = blob.size;
 
+      // 显示对比 & 单文件下载
       const line = document.createElement('div');
       line.className = 'line';
-      line.textContent = `${file.name}: ${(originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB`;
+      line.innerHTML = `
+        ${file.name}: ${(originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB
+      `;
       const dl = document.createElement('button');
       dl.className = 'download-btn';
       dl.textContent = 'Download';
@@ -111,14 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
       zip.file(file.name.replace(/\.[^/.]+$/, '_compressed.webm'), blob);
     }
 
+    // 生成 ZIP 下载按钮
     progressEl.textContent = 'Packaging ZIP…';
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     downloadZipBtn.style.display = 'inline-block';
     downloadZipBtn.disabled = false;
     downloadZipBtn.onclick = () => saveAs(zipBlob, 'compressed-audios-webm.zip');
+
     progressEl.textContent = 'Done!';
+    compressBtn.disabled = false;
   });
 
+  // MediaRecorder 录制为 WebM Audio
   function recordToWebMAudio(file, audioBitsPerSecond) {
     return new Promise((resolve, reject) => {
       const audio = document.createElement('audio');
@@ -130,14 +145,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       audio.onloadedmetadata = () => {
         const stream = audio.captureStream();
-        const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        const mime   = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
           ? 'audio/webm;codecs=opus'
           : 'audio/webm';
-        const recorder = new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond });
+        const recorder = new MediaRecorder(stream, {
+          mimeType: mime,
+          audioBitsPerSecond
+        });
         const chunks = [];
         recorder.ondataavailable = e => e.data && chunks.push(e.data);
-        recorder.onerror = e => reject(e.error || new Error('Recording failed'));
-        recorder.onstop = () => {
+        recorder.onerror         = e => reject(e.error || new Error('Recording failed'));
+        recorder.onstop          = () => {
           const out = new Blob(chunks, { type: mime });
           document.body.removeChild(audio);
           resolve(out);
