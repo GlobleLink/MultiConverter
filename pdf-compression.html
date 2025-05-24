@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF Compression • Smart File Tools</title>
+
+  <!-- 全局样式 -->
+  <link rel="stylesheet" href="../style.css" />
+  <!-- 本页专属样式 -->
+  <link rel="stylesheet" href="pdf-compression.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>Smart File Tools</h1>
+    <p class="subtitle">Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
+  </header>
+
+  <nav class="sub-nav">
+    <a href="index.html">← Back to Home</a>
+    <a href="image-compression.html">Image Compression</a>
+    <a href="video-compression.html">Video Compression</a>
+    <a href="pdf-compression.html" class="active">PDF Compression</a>
+    <a href="audio-compression.html">Audio Compression</a>
+  </nav>
+
+  <main class="container">
+    <h2>PDF Compression</h2>
+    <p class="upload-info">
+      Upload up to <strong>3 PDFs</strong> per batch.<br/>
+      Supported format: <strong>PDF</strong> only.<br/>
+      Compressed files remain in the same format.<br/>
+      <em>*Click or drag &amp; drop to select*</em>
+    </p>
+
+    <div class="drop-area" id="dropArea">
+      <span class="drop-icon">📄</span>
+      <p>Drag &amp; drop PDFs here, or click to select</p>
+      <input type="file" id="fileInput" accept="application/pdf" multiple hidden />
+    </div>
+
+    <ul class="file-list" id="fileList"></ul>
+
+    <div class="actions">
+      <button id="compressBtn" class="btn btn-primary">Compress PDFs</button>
+      <button id="downloadZipBtn" class="btn btn-primary" disabled style="display:none;">
+        Download ZIP
+      </button>
+      <button id="resetBtn" class="btn btn-secondary">Reset</button>
+    </div>
+
+    <p id="progress" class="progress">Waiting for upload…</p>
+    <div id="output" class="output"></div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2025 Smart File Tools</p>
+  </footer>
+
+  <!-- 依赖库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- 本页逻辑 -->
+  <script src="pdf-compression.js"></script>
+</body>
+</html>
