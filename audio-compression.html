@@ -21,52 +21,39 @@
     <a href="pdf-compression.html">PDF Compression</a>
     <a href="audio-compression.html" class="active">Audio Compression</a>
   </nav>
-
   <main class="container">
     <h2>Audio Compression</h2>
     <p class="upload-info">
-      Upload up to <strong>3 audios</strong> per batch.<br/>
+      Upload <strong>1 audio</strong> per batch.<br/>
       Supported: MP3, WAV, OGG, AAC, WebM.<br/>
-      All output will be compressed to <strong>WebM Audio (Opus)</strong>.<br/>
+      Output will be compressed to <strong>WebM Audio (Opus)</strong>.<br/>
       <em>*Click or drag &amp; drop to select*</em>
     </p>
-
     <div id="compatibilityMessage" class="warning" style="display:none;">
       ⚠️ Your browser/device doesn’t fully support audio capture/compression.<br/>
       Please upgrade your system or use a PC browser.
     </div>
-
     <div class="drop-area" id="dropArea">
       <span class="drop-icon">🎵</span>
-      <p>Drag &amp; drop audios here, or click to select</p>
-      <input type="file" id="fileInput" accept="audio/*" multiple hidden />
+      <p>Drag &amp; drop audio here, or click to select</p>
+      <input type="file" id="fileInput" accept="audio/*" hidden />
     </div>
-
     <ul class="file-list" id="fileList"></ul>
-
     <div class="quality-options">
       <label><input type="radio" name="quality" value="low" /> Low (32 kbps)</label>
       <label><input type="radio" name="quality" value="medium" checked /> Medium (64 kbps)</label>
       <label><input type="radio" name="quality" value="high" /> High (128 kbps)</label>
     </div>
-
     <div class="actions">
-      <button id="compressBtn" class="btn btn-primary">Compress Audios</button>
-      <button id="downloadZipBtn" class="btn btn-primary" disabled style="display:none;">
-        Download ZIP
-      </button>
+      <button id="compressBtn" class="btn btn-primary">Compress Audio</button>
       <button id="resetBtn" class="btn btn-secondary">Reset</button>
     </div>
-
     <p id="progress" class="progress">Waiting for upload…</p>
     <div id="output" class="output"></div>
   </main>
-
   <footer class="footer">
     <p>© 2025 Smart File Tools</p>
   </footer>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="audio-compression.js"></script>
 </body>
