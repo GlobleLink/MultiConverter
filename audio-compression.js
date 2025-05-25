@@ -1,134 +1,113 @@
-console.log('📦 audio-compression.js loaded (smart fallback)');
+console.log('📦 audio-compression.js loaded (with ffmpeg.wasm & zip batch)');
 
 document.addEventListener('DOMContentLoaded', () => {
   const dropArea = document.getElementById('dropArea');
   const fileInput = document.getElementById('fileInput');
   const fileListEl = document.getElementById('fileList');
   const compressBtn = document.getElementById('compressBtn');
-  const resetBtn = document.getElementById('resetBtn');
   const progressEl = document.getElementById('progress');
   const outputEl = document.getElementById('output');
-  let fileObj = null;
+  let fileArr = [];
+
+  // ffmpeg.wasm 初始化
+  let ffmpegLoaded = false;
+  let ffmpeg;
+  let ffmpegLoadingPromise = null;
+
+  async function loadFFmpeg() {
+    if (ffmpegLoaded) return;
+    if (ffmpegLoadingPromise) return ffmpegLoadingPromise;
+    progressEl.textContent = 'Loading audio compression engine...';
+    ffmpegLoadingPromise = new Promise(async (resolve) => {
+      const { createFFmpeg, fetchFile } = FFmpeg;
+      ffmpeg = createFFmpeg({ log: false });
+      await ffmpeg.load();
+      ffmpegLoaded = true;
+      resolve();
+    });
+    return ffmpegLoadingPromise;
+  }
 
   // 拖拽/点击上传
   ['dragover','dragleave','drop'].forEach(ev => {
     dropArea.addEventListener(ev, e => {
       e.preventDefault();
       dropArea.classList.toggle('hover', ev === 'dragover');
-      if (ev === 'drop') handleFile(e.dataTransfer.files[0]);
+      if (ev === 'drop') handleFiles(e.dataTransfer.files);
     });
   });
   dropArea.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', () => handleFile(fileInput.files[0]));
+  fileInput.addEventListener('change', () => handleFiles(fileInput.files));
 
-  function handleFile(file) {
-    if (!file || !file.type.startsWith('audio/')) return;
-    fileObj = { file, originalSize: file.size };
+  function handleFiles(files) {
+    fileArr = [];
+    for (let file of files) {
+      if (file && file.type.startsWith('audio/')) {
+        fileArr.push({ file, originalSize: file.size });
+      }
+    }
     renderFileList();
   }
 
   function renderFileList() {
     fileListEl.innerHTML = '';
-    if (!fileObj) return;
-    const li = document.createElement('li');
-    li.textContent = fileObj.file.name;
-    const btn = document.createElement('button');
-    btn.className = 'remove-btn';
-    btn.textContent = '×';
-    btn.onclick = () => {
-      fileObj = null;
-      renderFileList();
-    };
-    li.appendChild(btn);
-    fileListEl.appendChild(li);
+    if (!fileArr.length) return;
+    fileArr.forEach((obj, idx) => {
+      const li = document.createElement('li');
+      li.textContent = obj.file.name;
+      const btn = document.createElement('button');
+      btn.className = 'remove-btn';
+      btn.textContent = '×';
+      btn.onclick = () => {
+        fileArr.splice(idx, 1);
+        renderFileList();
+      };
+      li.appendChild(btn);
+      fileListEl.appendChild(li);
+    });
   }
 
-  resetBtn.onclick = () => {
-    fileObj = null;
-    renderFileList();
-    progressEl.textContent = 'Waiting for upload…';
-    outputEl.innerHTML = '';
-    compressBtn.disabled = false;
-  };
-
   compressBtn.onclick = async () => {
-    if (!fileObj) {
-      alert('Please select an audio file.');
+    if (!fileArr.length) {
+      alert('Please select audio files.');
       return;
     }
     compressBtn.disabled = true;
     outputEl.innerHTML = '';
     progressEl.textContent = 'Processing…';
 
-    const file = fileObj.file;
-    let blob, isCompressed = false;
-    let errorMsg = '';
+    await loadFFmpeg();
+    const zip = new JSZip();
+    let count = 0;
 
-    // 仅 webm/ogg 走 MediaRecorder 进行“压缩”，其它全部直接返回原文件
-    if (/\.(webm|ogg)$/i.test(file.name)) {
+    for (let obj of fileArr) {
+      const file = obj.file;
+      const inputName = file.name;
+      const outputName = file.name.replace(/\.[^/.]+$/, '_compressed.mp3');
       try {
-        const quality = document.querySelector('input[name="quality"]:checked').value;
-        const bitrateMap = { low: 32000, medium: 64000, high: 128000 };
-        blob = await recordToWebMAudio(file, bitrateMap[quality]);
-        isCompressed = true;
+        progressEl.textContent = `Compressing: ${file.name} (${count+1}/${fileArr.length})`;
+        await ffmpeg.FS('writeFile', inputName, await FFmpeg.fetchFile(file));
+        await ffmpeg.run('-i', inputName, '-b:a', '128k', outputName);
+        const data = ffmpeg.FS('readFile', outputName);
+        zip.file(outputName, data);
+        // 清理
+        ffmpeg.FS('unlink', inputName);
+        ffmpeg.FS('unlink', outputName);
       } catch (e) {
         console.warn(e);
-        blob = file;
-        errorMsg = `<span style="color:orange;">Compression failed, original file provided.</span>`;
+        zip.file(file.name, file); // 压缩失败则原样打包
       }
-    } else {
-      blob = file;
-      errorMsg = `<span style="color:orange;">This audio format cannot be compressed in browser, original file provided.</span>`;
+      count++;
     }
 
-    const afterSize = blob.size;
-    const div = document.createElement('div');
-    div.className = 'line';
-    div.innerHTML = `${file.name}: ${(fileObj.originalSize/1024).toFixed(1)} KB → ${(afterSize/1024).toFixed(1)} KB` +
-      (errorMsg ? `<br>${errorMsg}` : '');
-    const dl = document.createElement('button');
-    dl.className = 'download-btn';
-    dl.textContent = 'Download';
-    // 压缩/原样，下载均以 .webm 后缀（如果是压缩）或原后缀
-    dl.onclick = () => saveAs(blob, isCompressed 
-      ? file.name.replace(/\.[^/.]+$/, '_compressed.webm') 
-      : file.name);
-    div.appendChild(dl);
-    outputEl.appendChild(div);
+    progressEl.textContent = 'Packaging ZIP...';
+    const content = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'compressed_audios.zip';
+    a.click();
 
     progressEl.textContent = 'Done!';
     compressBtn.disabled = false;
   };
-
-  // 仅 webm/ogg 可录制压缩
-  function recordToWebMAudio(file, audioBitsPerSecond) {
-    return new Promise((resolve, reject) => {
-      const audio = document.createElement('audio');
-      audio.src = URL.createObjectURL(file);
-      audio.muted = true;
-      audio.playsInline = true;
-      audio.style.display = 'none';
-      document.body.appendChild(audio);
-
-      audio.onloadedmetadata = () => {
-        const stream = audio.captureStream();
-        const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-          ? 'audio/webm;codecs=opus'
-          : 'audio/webm';
-        const recorder = new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond });
-        const chunks = [];
-        recorder.ondataavailable = e => e.data && chunks.push(e.data);
-        recorder.onerror = e => reject(e.error || new Error('Recording failed'));
-        recorder.onstop = () => {
-          const out = new Blob(chunks, { type: mime });
-          document.body.removeChild(audio);
-          resolve(out);
-        };
-        recorder.start();
-        audio.play().catch(err => reject(err));
-        audio.onended = () => recorder.stop();
-      };
-      audio.onerror = () => reject(new Error('Failed to load audio'));
-    });
-  }
 });
