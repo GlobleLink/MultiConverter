@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const outputEl = document.getElementById('output');
   let fileArr = [];
 
+  // 支持的主流音频格式
+  const supportedTypes = [
+    'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/ogg',
+    'audio/aac', 'audio/x-aac', 'audio/webm', 'audio/flac', 'audio/x-flac',
+    'audio/mp4', 'audio/x-m4a', 'audio/m4a'
+  ];
+
   // ffmpeg.wasm 初始化
   let ffmpegLoaded = false;
   let ffmpeg;
@@ -42,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleFiles(files) {
     fileArr = [];
     for (let file of files) {
-      if (file && file.type.startsWith('audio/')) {
+      if (file && (file.type.startsWith('audio/') || supportedTypes.includes(file.type))) {
         fileArr.push({ file, originalSize: file.size });
       }
     }
@@ -67,6 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 获取用户选择的码率
+  function getSelectedBitrate() {
+    const radios = document.querySelectorAll('input[name="quality"]');
+    for (let radio of radios) {
+      if (radio.checked) return radio.value;
+    }
+    return '64k';
+  }
+
   compressBtn.onclick = async () => {
     if (!fileArr.length) {
       alert('Please select audio files.');
@@ -79,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     await loadFFmpeg();
     const zip = new JSZip();
     let count = 0;
+    const bitrate = getSelectedBitrate();
 
     for (let obj of fileArr) {
       const file = obj.file;
@@ -87,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         progressEl.textContent = `Compressing: ${file.name} (${count+1}/${fileArr.length})`;
         await ffmpeg.FS('writeFile', inputName, await FFmpeg.fetchFile(file));
-        await ffmpeg.run('-i', inputName, '-b:a', '128k', outputName);
+        await ffmpeg.run('-i', inputName, '-b:a', bitrate, '-y', outputName);
         const data = ffmpeg.FS('readFile', outputName);
         zip.file(outputName, data);
         // 清理

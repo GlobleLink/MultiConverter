@@ -4,16 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Audio Compression • Smart File Tools</title>
-  <!-- 如无 style.css 可删除下一行 -->
-  <!-- <link rel="stylesheet" href="../style.css" /> -->
+  <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="audio-compression.css" />
 </head>
 <body>
-  <header class="header">
+  <header class="home-header">
     <h1>Smart File Tools</h1>
-    <p class="subtitle">
-      Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly
-    </p>
+    <p>Compress &amp; Convert Images, Videos, Audio &amp; Documents Instantly</p>
   </header>
   <nav class="sub-nav">
     <a href="index.html">← Back to Home</a>
@@ -22,12 +19,12 @@
     <a href="pdf-compression.html">PDF Compression</a>
     <a href="audio-compression.html" class="active">Audio Compression</a>
   </nav>
-  <main class="container">
+  <main class="tool-section">
     <h2>Audio Compression</h2>
     <p class="upload-info">
       Upload <strong>multiple audios</strong> per batch.<br/>
-      Supported: MP3, WAV, OGG, AAC, WebM.<br/>
-      Output will be compressed to <strong>MP3 (128kbps)</strong>.<br/>
+      Supported: MP3, WAV, OGG, AAC, M4A, FLAC, WebM, etc.<br/>
+      Output: <strong>MP3</strong> (select bitrate below).<br/>
       <em>*Click or drag &amp; drop to select*</em>
     </p>
     <div id="compatibilityMessage" class="warning" style="display:none;">
@@ -40,11 +37,11 @@
       <input type="file" id="fileInput" accept="audio/*" hidden multiple />
     </div>
     <ul class="file-list" id="fileList"></ul>
-    <div class="quality-options" style="display:none;">
-      <!-- 码率选择暂未实现，如需可扩展 -->
-      <label><input type="radio" name="quality" value="low" /> Low (32 kbps)</label>
-      <label><input type="radio" name="quality" value="medium" checked /> Medium (64 kbps)</label>
-      <label><input type="radio" name="quality" value="high" /> High (128 kbps)</label>
+    <div class="quality-options">
+      <label><input type="radio" name="quality" value="32k" /> Low (32 kbps)</label>
+      <label><input type="radio" name="quality" value="64k" checked /> Medium (64 kbps)</label>
+      <label><input type="radio" name="quality" value="128k" /> High (128 kbps)</label>
+      <label><input type="radio" name="quality" value="192k" /> Very High (192 kbps)</label>
     </div>
     <div class="actions">
       <button id="compressBtn" class="btn btn-primary">Batch Compress &amp; Download ZIP</button>
@@ -52,8 +49,8 @@
     <p id="progress" class="progress">Waiting for upload…</p>
     <div id="output" class="output"></div>
   </main>
-  <footer class="footer">
-    <p>© 2025 Smart File Tools</p>
+  <footer>
+    <p>&copy; 2025 Smart File Tools</p>
   </footer>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
