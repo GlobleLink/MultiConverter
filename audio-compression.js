@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ffmpegLoadingPromise) return ffmpegLoadingPromise;
     progressEl.textContent = 'Loading audio compression engine...';
     ffmpegLoadingPromise = new Promise(async (resolve) => {
-      const { createFFmpeg, fetchFile } = FFmpeg;
+      // 关键修正：用 window.FFmpeg
+      const { createFFmpeg, fetchFile } = window.FFmpeg;
       ffmpeg = createFFmpeg({ log: false });
       await ffmpeg.load();
       ffmpegLoaded = true;
@@ -103,7 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const outputName = file.name.replace(/\.[^/.]+$/, '_compressed.mp3');
       try {
         progressEl.textContent = `Compressing: ${file.name} (${count+1}/${fileArr.length})`;
-        await ffmpeg.FS('writeFile', inputName, await FFmpeg.fetchFile(file));
+        const { fetchFile } = window.FFmpeg;
+        await ffmpeg.FS('writeFile', inputName, await fetchFile(file));
         await ffmpeg.run('-i', inputName, '-b:a', bitrate, '-y', outputName);
         const data = ffmpeg.FS('readFile', outputName);
         zip.file(outputName, data);
